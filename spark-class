@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-exec /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.342.b07-1.amzn2.0.1.x86_64/jre/bin/java -cp /var/lang/lib/python3.8/site-packages/pyspark/conf/:/var/lang/lib/python3.8/site-packages/pyspark/jars/* -Xmx1g "$@"
+exec /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.352.b08-2.amzn2.0.1.x86_64/jre/bin/java -cp /var/lang/lib/python3.8/site-packages/pyspark/conf/:/var/lang/lib/python3.8/site-packages/pyspark/jars/* -Xmx1g "$@"

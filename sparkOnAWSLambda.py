@@ -8,22 +8,17 @@ def lambda_handler(event, context):
 
  input_path = os.environ['input_path'] 
  target_path = os.environ['output_path']
+ s3_bucket  = os.environ['s3_bucket']
 
- aws_region = os.environ['AWS_REGION'] 
- aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID'] 
- aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY'] 
- session_token = os.environ['AWS_SESSION_TOKEN']
+ aws_region = os.environ['REGION'] 
+ aws_access_key_id = os.environ['ACCESS_KEY_ID'] 
+ aws_secret_access_key = os.environ['SECRET_ACCESS_KEY'] 
+ session_token = os.environ['SESSION_TOKEN']
  
- 
- input_path = f's3://'
- output_path = f's3a://'
- 
- print(" ******* Input path",input_path)
- print(" ******* Out path",output_path)
  
  # Change the input and target location for usage
- input_path ="s3a://sparkonlambda-1/inp/test.csv"
- target_path ="s3a://sparkonlambda-1/out/csv_table"
+ input_path = "s3a://"+s3_bucket+"/"+input_path
+ target_path ="s3a://"+s3_bucket+"/"+target_path
  
  print(" ******* Input path ",input_path)
  print(" ******* Target path ",target_path)
