@@ -12,10 +12,11 @@ ARG SOURCE_REGION_NAME='us-east-1'
 RUN yum update -y && \
     yum -y update zlib && \
     yum -y install wget && \
+    yum -y install yum-plugin-versionlock && \
+    yum -y versionlock add java-1.8.0-openjdk-1.8.0.352.b08-0.amzn2.0.1.x86_64 && \
     yum -y install java-1.8.0-openjdk && \
     pip install pyspark==$PYSPARK_VERSION && \
     yum clean all
-
 
 # setting the environment variable and Spark path
 ENV SPARK_HOME="/var/lang/lib/python3.8/site-packages/pyspark"
@@ -37,7 +38,7 @@ RUN mkdir $SPARK_HOME/conf && \
     wget -q https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/${AWS_SDK_VERSION}/aws-java-sdk-bundle-${AWS_SDK_VERSION}.jar -P ${SPARK_HOME}/jars/
 
 # JAVA_HOME depends upon the java version used
-ENV JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.342.b07-1.amzn2.0.1.x86_64/jre" 
+ENV JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.352.b08-2.amzn2.0.1.x86_64/jre" 
 ENV PATH=${PATH}:${JAVA_HOME}/bin
 
 
