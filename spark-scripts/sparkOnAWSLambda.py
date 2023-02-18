@@ -42,4 +42,5 @@ def lambda_handler(event, context):
  
 
  print("Started Writing the CSV file to  Target S3 location ", target_path)
- df.write.format("csv").save(target_path)
+ #df.write.format("csv").save(target_path)
+ df.write.format("hudi").save(target_path)
