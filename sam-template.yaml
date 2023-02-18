@@ -84,7 +84,7 @@ Parameters:
 #    Type: String
 #    Default: 1
   ImageUri:
-    Description: 'ECR Uri for the image.If not specififed, a code build project will be provisioned to build the default image'
+    Description: 'ECR Uri for the image.If not specififed, a code build project will be provisioned to build the default image that will be pushed to ECR'
     Type: String
     Default: ''
 

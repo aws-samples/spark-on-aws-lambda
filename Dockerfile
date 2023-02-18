@@ -12,10 +12,11 @@ ARG SOURCE_REGION_NAME='us-east-1'
 RUN yum update -y && \
     yum -y update zlib && \
     yum -y install wget && \
+    yum -y install yum-plugin-versionlock && \
+    yum -y versionlock add java-1.8.0-openjdk-1.8.0.352.b08-0.amzn2.0.1.x86_64 && \
     yum -y install java-1.8.0-openjdk && \
     pip install pyspark==$PYSPARK_VERSION && \
     yum clean all
-
 
 # setting the environment variable and Spark path
 ENV SPARK_HOME="/var/lang/lib/python3.8/site-packages/pyspark"
