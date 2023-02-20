@@ -5,6 +5,11 @@ import sys
 import os
 
 def spark_script():
+ """
+ Function that gets triggered when AWS Lambda
+ is running.
+ """
+ 
  print("start...................")
 
  input_path = os.environ['input_path'] 
@@ -39,14 +44,15 @@ def spark_script():
  .config("spark.hadoop.fs.s3a.aws.credentials.provider","org.apache.hadoop.fs.s3a.TemporaryAWSCredentialsProvider") \
  .enableHiveSupport().getOrCreate()
  
-
  
  print("Started Reading the CSV file from S3 location ",input_path)
  
+ #Reading the csv file form input_path
  df=spark.read.option('header','true').csv(input_path)
  df = df.withColumn("last_upd_timestamp", current_timestamp())
  df.show()
  
+ # HUDI configuration for the table write
  hudi_options = {
   'hoodie.table.name': 'customer_table',
     'hoodie.datasource.write.recordkey.field': 'Customer_ID',
@@ -61,9 +67,10 @@ def spark_script():
     "hoodie.embed.timeline.server":"false" # It's not advisable to use this configuration. Working on workaround without using this config. 
  }
 
- print("Started Writing the CSV file to  Target hudi table ", target_path)
+ print("Started Writing the dataframe file to  Target hudi table ", target_path)
  df.write.format("hudi").options(**hudi_options).mode("overwrite").save(target_path)
  # df.write.format("csv").save(target_path)
  
 if __name__ == '__main__':
+ #Calling the Spark script method
  spark_script()
