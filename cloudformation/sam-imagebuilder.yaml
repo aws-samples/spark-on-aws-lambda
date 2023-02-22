@@ -1,0 +1,329 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Parameters:
+  ImageRepoPrefix:
+    Type: String
+    Default: sparkonlambda
+    Description: Prefix of the Image Repository to be created
+
+Resources:
+
+  SparkOnLambdaImageCodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: codebuild.amazonaws.com
+          Action: sts:AssumeRole
+      RoleName:
+        Fn::Sub: 'spark-on-lambda-codebuild-${AWS::StackName}-role'
+
+  SparkOnLambdaimageCodeBuildPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Roles:
+      - Ref: SparkOnLambdaImageCodeBuildRole
+      ManagedPolicyName:
+        Fn::Sub: spark-on-lambda-codebuild-policy
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: ListImagesInRepository
+            Effect: Allow
+            Action:
+              - ecr:ListImages
+            Resource: !Sub "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${SparkOnLambdaECRRepository}"
+          - Sid: LogAccess
+            Effect: Allow
+            Action:
+              - logs:Create*
+              - logs:Describe*
+              - logs:Get*
+              - logs:List*
+              - logs:Put*
+            Resource: "*"
+          - Sid: GetAuthorizationToken
+            Effect: Allow
+            Action:
+              - ecr:GetAuthorizationToken
+            Resource: "*"
+          - Sid: ManageRepositoryContents
+            Effect: Allow
+            Action:
+              - ecr:BatchCheckLayerAvailability
+              - ecr:GetDownloadUrlForLayer
+              - ecr:GetRepositoryPolicy
+              - ecr:DescribeRepositories
+              - ecr:ListImages
+              - ecr:DescribeImages
+              - ecr:BatchGetImage
+              - ecr:InitiateLayerUpload
+              - ecr:UploadLayerPart
+              - ecr:CompleteLayerUpload
+              - ecr:PutImage
+            Resource: !Sub "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${SparkOnLambdaECRRepository}"
+
+  SparkOnLambdaECRRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      ImageScanningConfiguration:
+        ScanOnPush: 'true'
+      RepositoryName: !Sub '${ImageRepoPrefix}-${AWS::StackName}'
+      LifecyclePolicy:
+        LifecyclePolicyText: "{\n     \"rules\": [\n {\n   \"rulePriority\": 2,\n\
+          \   \"description\": \"Keep only last 10 tagged images, expire all others\"\
+          ,\n   \"selection\": {\n     \"tagStatus\": \"any\",\n     \"countType\"\
+          : \"imageCountMoreThan\",\n     \"countNumber\": 10\n   },\n   \"action\"\
+          : {\n     \"type\": \"expire\"\n   }\n },\n {\n             \"rulePriority\"\
+          : 1,\n             \"description\": \"Expire Untagged images older than\
+          \ 5 days\",\n             \"selection\": {\n                 \"tagStatus\"\
+          : \"untagged\",\n                 \"countType\": \"sinceImagePushed\",\n\
+          \                 \"countUnit\": \"days\",\n                 \"countNumber\"\
+          : 5\n             },\n             \"action\": {\n                 \"type\"\
+          : \"expire\"\n             }\n         }\n ]\n }\n"
+
+  SparkOnLambdaCodeBuild:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Description: This Project builds the spark on lambda container with all dependcies and a entry point lambda script sourced from the  github repository
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
+        Type: LINUX_CONTAINER
+        PrivilegedMode: true
+        EnvironmentVariables:
+          - Name: AWS_DEFAULT_REGION
+            Value: !Sub ${AWS::Region}
+          - Name: AWS_ACCOUNT_ID
+            Value: !Sub ${AWS::AccountId}
+          - Name: IMAGE_REPO_NAME
+            Value: !Ref SparkOnLambdaECRRepository
+      Name: !Sub 'spark-on-aws-lambda-build-${AWS::StackName}'
+      QueuedTimeoutInMinutes: 10
+      ServiceRole:
+        Fn::GetAtt:
+        - SparkOnLambdaImageCodeBuildRole
+        - Arn
+      Source:
+        Type: NO_SOURCE
+        BuildSpec: !Sub |
+          version: 0.2
+          phases:
+            pre_build:
+              commands:
+                - echo Logging in to Amazon ECR...
+                - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+            build:
+              commands:
+                - echo Downloading requires source files from git
+                - wget -q https://raw.githubusercontent.com/aws-samples/spark-on-aws-lambda/main/Dockerfile -P ./
+                - wget -q https://raw.githubusercontent.com/aws-samples/spark-on-aws-lambda/main/spark-class -P ./
+                - wget -q https://raw.githubusercontent.com/aws-samples/spark-on-aws-lambda/main/sparkLambdaHandler.py -P ./    
+                - echo Build started on `date`
+                - echo Building the Docker image...          
+                - docker build -t $IMAGE_REPO_NAME:latest .
+                - docker tag $IMAGE_REPO_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest      
+            post_build:
+              commands:
+                - echo Build completed on `date`
+                - echo Pushing the Docker image...
+                - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
+      TimeoutInMinutes: 20
+
+  ImageBuildLambda:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.lambda_handler
+      InlineCode: |
+          import boto3
+          import os
+          import time
+          import logging
+          from botocore.vendored import requests
+          import cfnresponse
+          
+          code_build_project_name=os.environ['CODEBUILD_PROJECT']
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+          
+          client = boto3.client('codebuild')
+          def lambda_handler(event, context):
+            logger.info('got event {}'.format(event))
+            responseData = {}
+
+            if event['RequestType'] in ['Create','Update']:
+              logger.info('Running code build for project '+code_build_project_name)
+              response = client.start_build(projectName=code_build_project_name)
+              build_id=response['build']['arn']
+              logger.info(response)
+              responseData['buildid'] = build_id
+            else: # delete 
+              responseData['buildid'] = 'NA'
+            logger.info('responseData {}'.format(responseData))
+            if event.get('StackId',None) is not None:
+              logger.info('Cfn request. Send Response')
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData, responseData['buildid'])
+      Runtime: python3.8
+      Description: A function that runs the code build project.
+      Policies:
+        - Statement:
+            - Action:
+                - codebuild:StartBuild
+                - codebuild:Get*
+                - codebuild:List*
+              Effect: Allow
+              Resource: !GetAtt SparkOnLambdaCodeBuild.Arn
+          Version: '2012-10-17'
+        - Statement:
+            - Action:
+                - iam:PassRole
+              Effect: Allow
+              Resource: !GetAtt SparkOnLambdaImageCodeBuildRole.Arn
+          Version: '2012-10-17'
+        - Statement:
+            - Action:
+                - logs:*
+                - codebuild:BatchGet*
+              Effect: Allow
+              Resource: "*"
+          Version: '2012-10-17'
+      Environment:
+        Variables:
+          CODEBUILD_PROJECT: !Ref SparkOnLambdaCodeBuild
+
+  InvokeImageBuild:
+    DependsOn: ImageBuildLambda
+    Type: Custom::InvokeImageBuildLambda
+    Properties:
+      ServiceToken: !GetAtt ImageBuildLambda.Arn
+
+
+#  RuleSignalCFNPostImageBuild:
+#    Type: AWS::Events::Rule
+#    DependsOn:
+#      - InvokeImageBuild
+#      - ImageBuildWaitHandle
+#    Properties:
+#      Description: "Event rule to signal cloudformation of image build activity"
+#      EventPattern:
+#        source:
+#          - "aws.codebuild"
+#        detail-type:
+#          - "CodeBuild Build State Change"
+#        detail:
+#          build-status:
+#            - "SUCCEEDED"
+#            - "FAILED"
+#            - "STOPPED"
+#          build-id:
+#            - !GetAtt InvokeImageBuild.buildid
+#      State: ENABLED
+#      Targets:
+#         - Arn: !GetAtt ImageBuildCompletionCheckLambda.Arn
+#           Id: "invoke-cfn-signal-lambda"
+#
+#  InvokeLambdaFunctionPermission:
+#    Type: AWS::Lambda::Permission
+#    Properties:
+#      FunctionName: !GetAtt ImageBuildCompletionCheckLambda.Arn
+#      Action: lambda:InvokeFunction
+#      Principal: events.amazonaws.com
+#      SourceArn: !GetAtt RuleSignalCFNPostImageBuild.Arn
+#
+#  ImageBuildCompletionCheckLambda:
+#    Type: 'AWS::Serverless::Function'
+#    DependsOn:
+#      - InvokeImageBuild
+#      - ImageBuildWaitHandle
+#    Properties:
+#      Handler: index.lambda_handler
+#      InlineCode: |
+#        import json
+#        import logging
+#        import os
+#        import uuid
+#
+#        import urllib3
+#
+#        code_build_project_name = os.environ['CODEBUILD_PROJECT']
+#        code_build_id = os.environ['CODEBUILD_ID']
+#        cfn_handle = os.environ['CFN_HANDLE']
+#        logger = logging.getLogger()
+#        logger.setLevel(logging.INFO)
+#
+#
+#        def lambda_handler(event, context):
+#            logger.info('got event {}'.format(event))
+#            build_status = event['detail']['build-status']
+#            uuid_value = uuid.uuid1()
+#            data = {"Reason": f"Image Build Completed with status {build_status}",
+#                    "UniqueId": uuid_value,
+#                    "Data": f"Image Build Completed with statsus {build_status}"}
+#            if build_status == 'SUCCEEDED':
+#                data["Status"] = "SUCCESS"
+#            else:
+#                data["Status"] = "FAILURE"
+#            logger.info('Code build is complete')
+#            logger.info('Send signal back to cfn stack')
+#            http = urllib3.PoolManager()
+#            response = http.request("POST",cfn_handle, fields=json.dumps(data))
+#            logger.info(response)
+#
+#      Runtime: python3.8
+#      Description: A function that runs the code build project.
+#      Policies:
+#        - Statement:
+#            - Action:
+#                - codebuild:StartBuild
+#                - codebuild:Get*
+#                - codebuild:List*
+#              Effect: Allow
+#              Resource: !GetAtt SparkOnLambdaCodeBuild.Arn
+#          Version: '2012-10-17'
+#        - Statement:
+#            - Action:
+#                - iam:PassRole
+#              Effect: Allow
+#              Resource: !GetAtt SparkOnLambdaImageCodeBuildRole.Arn
+#          Version: '2012-10-17'
+#        - Statement:
+#            - Action:
+#                - logs:*
+#                - codebuild:BatchGetBuild
+#              Effect: Allow
+#              Resource: "*"
+#          Version: '2012-10-17'
+#      Environment:
+#        Variables:
+#          CODEBUILD_PROJECT: !Ref SparkOnLambdaCodeBuild
+#          CODEBUILD_ID: !GetAtt InvokeImageBuild.buildid
+#          CFN_HANDLE: !Ref ImageBuildWaitHandle
+#
+#  ImageBuildWaitHandle:
+#    Type: AWS::CloudFormation::WaitConditionHandle
+#
+#
+#  ImageBuildWaitCondition:
+#    Type: AWS::CloudFormation::WaitCondition
+#    Properties:
+#      Count: 1
+#      Handle: !Ref ImageBuildWaitHandle
+#      Timeout: 600
+
+Outputs:
+  ImageRepoName:
+    Description: ECR image Repository
+    Value: !Ref SparkOnLambdaECRRepository
+
+  ImageRepoUri:
+    Description: ECR  Repository URI
+    Value: !GetAtt SparkOnLambdaECRRepository.RepositoryUri
+
+  ImageUri:
+    Description: ECR image URI
+    Value: !Join [ ':', [ !GetAtt SparkOnLambdaECRRepository.RepositoryUri, 'latest' ] ]
