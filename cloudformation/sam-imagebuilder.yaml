@@ -19,7 +19,7 @@ Resources:
             Service: codebuild.amazonaws.com
           Action: sts:AssumeRole
       RoleName:
-        Fn::Sub: 'spark-on-lambda-codebuild-${AWS::StackName}-role'
+        Fn::Sub: 'Spark-codebuild-${AWS::StackName}-role'
 
   SparkOnLambdaimageCodeBuildPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -27,7 +27,7 @@ Resources:
       Roles:
       - Ref: SparkOnLambdaImageCodeBuildRole
       ManagedPolicyName:
-        Fn::Sub: spark-on-lambda-codebuild-policy
+        Fn::Sub: 'spark-codebuild-policy-${AWS::StackName}'
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
