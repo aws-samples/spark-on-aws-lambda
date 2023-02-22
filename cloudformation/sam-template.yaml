@@ -25,14 +25,14 @@ Parameters:
 #  SparkScriptArguments:
 #    Type: String
 #    Description: 'Option: Arguments to pass to spark script'
-  InputPath:
-    Type: String
-    Description: 'Mandatory: S3 key where the input data is located eg: s3://bucket/folder/'
-    Default: ''
-  OutputPath:
-    Type: String
-    Description: 'Mandatory: S3 key where the output data will be located eg: s3://bucket/folder/'
-    Default: ''
+#  InputPath:
+#    Type: String
+#    Description: 'Mandatory: S3 key where the input data is located eg: s3://bucket/folder/'
+#    Default: ''
+#  OutputPath:
+#    Type: String
+#    Description: 'Mandatory: S3 key where the output data will be located eg: s3://bucket/folder/'
+#    Default: ''
   LambdaFunctionPrefix:
     Description: 'Optional: This is the prefix for the name of the lambda function that will be created. This name must satisfy the pattern ^[a-z0-9-_]{1,64}$'
     Type: String
@@ -65,11 +65,11 @@ Parameters:
     Type: 'CommaDelimitedList'
     Default: ''
   ImageUri:
-    Description: 'Mandatory: ECR Uri for the image.'
+    Description: 'Mandatory: ECR Uri for the image. If not present, then create and push using the sam-imagebuilder.yaml in the github '
     Type: String
     Default: ''
   Command:
-    Description: 'Optional: Command override for the image'
+    Description: 'Optional: Command override for the image. This is not required'
     Type: 'CommaDelimitedList'
     Default: sparkLambdaHandler.lambda_handler
   EntryPoint:
@@ -170,6 +170,6 @@ Resources:
         Variables:
           SCRIPT_BUCKET: !Ref ScriptBucket
           SPARK_SCRIPT: !Ref SparkScript
-          INPUT_PATH: !Ref InputPath
-          OUTPUT_PATH: !Ref OutputPath
+          #INPUT_PATH: !Ref InputPath
+          #OUTPUT_PATH: !Ref OutputPath
 
