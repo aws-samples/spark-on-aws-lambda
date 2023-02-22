@@ -4,10 +4,10 @@ Metadata:
   'AWS::ServerlessRepo::Application':
     Name: SparkOnLambda
     Description: 'This lambda enables you to run spark on lambda'
-    Author: 'AWS'
+    Author: 'AWS Project Bluebear'
     SpdxLicenseId: MIT-0
-    LicenseUrl: LICENSE.txt
-    ReadmeUrl: README.md
+    LicenseUrl: ../LICENSE.txt
+    ReadmeUrl: ../README.md
     Labels:
       - spark
       - lambda
