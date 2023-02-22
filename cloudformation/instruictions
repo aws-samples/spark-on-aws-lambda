@@ -1,0 +1,35 @@
+# To publish a pacakge --- IGNORE
+repo_uri=`aws ecr create-repository --repository-name sparkonlambda --image-scanning-configuration scanOnPush=true --image-tag-mutability MUTABLE --query 'repository.repositoryUri' --output text`
+aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin $repo_uri
+docker build -t sparkonlambda .
+docker tag  sparkonlambda:latest $repo_uri:latest
+docker push $repo_uri:latest
+repo_uri=`aws ecr create-repository --repository-name sparkonlambda --image-scanning-configuration scanOnPush=true --image-tag-mutability MUTABLE --query 'repository.repositoryUri' --output text`
+sam package --resolve-s3  --template-file sam-template.yaml --output-template-file packaged-template.yaml --region ap-southeast-2 --force-upload --image-repository $repo_uri
+sam publish --semantic-version 1.0.0
+#------------------------------------------
+
+### USE THE BELOW
+
+## Deploy image builder if you want to set up stack to build and push the docker image
+sam deploy --template-file sam-imagebuilder.yaml --stack-name spark-on-lambda-image-builder --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM --resolve-s3
+## This will deploy a code build project and initiate the iamge build process. The code build project will  push the image with the latest tag. Please confirm if the process is success by viewing the codebuild service page
+## Copy the repo uri that you see in the output of the above stack and use it in the below command. If you already have an existing repo, use that instead
+
+< Based on output above
+repo_uri=484088235428.dkr.ecr.ap-southeast-2.amazonaws.com/sparkonlambda-spark-on-lambda-image-builder
+image_uri=484088235428.dkr.ecr.ap-southeast-2.amazonaws.com/sparkonlambda-spark-on-lambda-image-builder:latest
+>
+sam package --resolve-s3  --template-file sam-template.yaml --output-template-file packaged-template.yaml --region <your region> --force-upload --image-repository <repo_uri>
+eg: sam package --resolve-s3  --template-file sam-template.yaml --output-template-file packaged-template.yaml --region ap-southeast-2 --force-upload --image-repository 484088235428.dkr.ecr.ap-southeast-2.amazonaws.com/sparkonlambda-spark-on-lambda-image-builder
+# To publish a new servlerss applciation
+sam publish --template packaged-template.yaml
+
+
+
+
+
+# To deploy directly use sam deploy
+sam deploy --template-file sam-template.yaml --stack-name spark-on-lambda-stack --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM --resolve-s3 --image-repository 484088235428.dkr.ecr.ap-southeast-2.amazonaws.com/sparkonlambda-spark-on-lambda-image-builder --parameter-overrides  'ParameterKey=ScriptBucket,ParameterValue=abc ParameterKey=SparkScript,ParameterValue=opt/asda.py ParameterKey=ImageUri,ParameterValue=484088235428.dkr.ecr.ap-southeast-2.amazonaws.com/sparkonlambda-spark-on-lambda-image-builder:latest'
+
+

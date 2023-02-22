@@ -5,10 +5,11 @@ import os
 
 def lambda_handler(event, context):
  print("start...................")
+ # arguments=os.environ.get('SPARK_ARGUMENTS', '')
 
- input_path = os.environ['input_path'] 
- target_path = os.environ['output_path']
- s3_bucket  = os.environ['s3_bucket']
+ input_path = os.environ['INPUT_PATH']
+ target_path = os.environ['OUTPUT_PATH']
+ # s3_bucket  = os.environ['s3_bucket']
 
  aws_region = os.environ['REGION'] 
  aws_access_key_id = os.environ['ACCESS_KEY_ID'] 
