@@ -14,7 +14,7 @@ RUN yum update -y && \
     yum -y update zlib && \
     yum -y install wget && \
     yum -y install yum-plugin-versionlock && \
-    yum -y versionlock add java-1.8.0-openjdk-1.8.0.352.b08-0.amzn2.0.1.x86_64 && \
+    yum -y versionlock add java-1.8.0-openjdk-1.8.0.362.b08-0.amzn2.0.1.x86_64 && \
     yum -y install java-1.8.0-openjdk && \
     pip install --upgrade pip && \
     pip install pyspark==$PYSPARK_VERSION && \
