@@ -3,7 +3,7 @@ Transform: 'AWS::Serverless-2016-10-31'
 Metadata:
   'AWS::ServerlessRepo::Application':
     Name: SparkOnLambda
-    Description: 'This lambda enables you to run spark on lambda'
+    Description: 'The Application creates AWS Lambda with Spark. Run your spark loads 75 to 80% less cost or FREE!! if you are within AWS Lambda free tier limits'
     Author: 'AWS Project Bluebear'
     SpdxLicenseId: MIT-0
     LicenseUrl: ../LICENSE.txt
@@ -11,28 +11,23 @@ Metadata:
     Labels:
       - spark
       - lambda
+      - pyspark
+      - serverless
     HomePageUrl: 'https://github.com/aws-samples/spark-on-aws-lambda'
     SemanticVersion: 1.2.0
     SourceCodeUrl: 'https://github.com/aws-samples/spark-on-aws-lambda'
 
 Parameters:
+  ImageUri:
+    Description: 'Mandatory: ECR Uri for the image. If not present, then create and push using the sam-imagebuilder.yaml in the github https://github.com/aws-samples/spark-on-aws-lambda '
+    Type: String
+    Default: ''
   ScriptBucket:
     Type: String
-    Description: 'Mandatory: Bucket name where the spark script is stored'
+    Description: 'Mandatory: Amazon S3 Bucket name where the spark script is stored. Just the bucket name e.g. bucket1'
   SparkScript:
     Type: String
-    Description: 'Mandatory: S3 key where the spark script resides.Start without the /.eg: script/location/name.py'
-#  SparkScriptArguments:
-#    Type: String
-#    Description: 'Option: Arguments to pass to spark script'
-#  InputPath:
-#    Type: String
-#    Description: 'Mandatory: S3 key where the input data is located eg: s3://bucket/folder/'
-#    Default: ''
-#  OutputPath:
-#    Type: String
-#    Description: 'Mandatory: S3 key where the output data will be located eg: s3://bucket/folder/'
-#    Default: ''
+    Description: 'Mandatory: Amazon S3 key where the spark script resides. Start without the /.eg: script/location/name.py'
   LambdaFunctionPrefix:
     Description: 'Optional: This is the prefix for the name of the lambda function that will be created. This name must satisfy the pattern ^[a-z0-9-_]{1,64}$'
     Type: String
@@ -64,10 +59,7 @@ Parameters:
     Description: 'Optional: One or more Subnet IDs corresponding to the Subnet that the Lambda function can use to access you data source. (e.g. subnet1,subnet2).Only used if AttachToVpc is True'
     Type: 'CommaDelimitedList'
     Default: ''
-  ImageUri:
-    Description: 'Mandatory: ECR Uri for the image. If not present, then create and push using the sam-imagebuilder.yaml in the github '
-    Type: String
-    Default: ''
+  
   Command:
     Description: 'Optional: Command override for the image. This is not required'
     Type: 'CommaDelimitedList'
