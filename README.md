@@ -60,7 +60,7 @@ docker build -t sparkonlambda .
 #Authenticate the docker CLI with Amazon ECR
 
 ```
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <account>.dkr.ecr.us-east-1.amazonaws.com</code>
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <accountnumber>.dkr.ecr.us-east-1.amazonaws.com
 ```
 
 ### Create the Amazon ECR repository using command line
@@ -73,7 +73,7 @@ aws ecr create-repository --repository-name sparkonlambda --image-scanning-confi
 
 
 ```
-docker tag  sparkonlambda:latest 123456789012.dkr.ecr.us-east-1.amazonaws.com/sparkonlambda:latest
+docker tag  sparkonlambda:latest <accountnumber>.dkr.ecr.us-east-1.amazonaws.com/sparkonlambda:latest
 ```
 ###  Amazon ECR push to repository
 
