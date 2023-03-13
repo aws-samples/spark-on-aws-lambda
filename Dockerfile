@@ -5,8 +5,12 @@ FROM public.ecr.aws/lambda/python:3.8
 ARG HADOOP_VERSION=3.2.4
 ARG AWS_SDK_VERSION=1.11.901
 ARG PYSPARK_VERSION=3.3.0
-ARG FRAMEWORK_VERSION=2.2.0
-ARG FRAMEWORK='DELTA'
+
+#FRAMEWORK will passed during the Docker build 
+ARG FRAMEWORK
+ARG DELTA_FRAMEWORK_VERSION=2.2.0
+ARG HUDI_FRAMEWORK_VERSION=2.2.0
+ARG ICEBERG_FRAMEWORK_VERSION=2.2.0
 
 
 # yum updates, security updates for zlib, java installation and pyspark installation
@@ -37,11 +41,11 @@ RUN mkdir $SPARK_HOME/conf && \
     wget -q https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/${AWS_SDK_VERSION}/aws-java-sdk-bundle-${AWS_SDK_VERSION}.jar -P ${SPARK_HOME}/jars/ && \
     if [ "$FRAMEWORK" = "HUDI" ]; then \
         echo "Downloading the HUDI Jar file"; \
-        wget -q https://repo1.maven.org/maven2/org/apache/hudi/hudi-spark3.3-bundle_2.12/${FRAMEWORK_VERSION}/hudi-spark3.3-bundle_2.12-${FRAMEWORK_VERSION}.jar -P ${SPARK_HOME}/jars/; \
+        wget -q https://repo1.maven.org/maven2/org/apache/hudi/hudi-spark3.3-bundle_2.12/${HUDI_FRAMEWORK_VERSION}/hudi-spark3.3-bundle_2.12-${HUDI_FRAMEWORK_VERSION}.jar -P ${SPARK_HOME}/jars/; \
     elif [ "$FRAMEWORK" = "DELTA" ]; then \
         echo "Downloading the DELTA Jar file"; \
-        wget -q https://repo1.maven.org/maven2/io/delta/delta-core_2.12/${FRAMEWORK_VERSION}/delta-core_2.12-${FRAMEWORK_VERSION}.jar -P ${SPARK_HOME}/jars/; \
-        wget -q https://repo1.maven.org/maven2/io/delta/delta-storage/${FRAMEWORK_VERSION}/delta-storage-${FRAMEWORK_VERSION}.jar -P ${SPARK_HOME}/jars/; \
+        wget -q https://repo1.maven.org/maven2/io/delta/delta-core_2.12/${DELTA_FRAMEWORK_VERSION}/delta-core_2.12-${DELTA_FRAMEWORK_VERSION}.jar -P ${SPARK_HOME}/jars/; \
+        wget -q https://repo1.maven.org/maven2/io/delta/delta-storage/${DELTA_FRAMEWORK_VERSION}/delta-storage-${DELTA_FRAMEWORK_VERSION}.jar -P ${SPARK_HOME}/jars/; \
     elif [ "$FRAMEWORK" = "ICEBERG" ]; then \
         echo "Downloading the ICEBERG Jar file"; \
     fi
