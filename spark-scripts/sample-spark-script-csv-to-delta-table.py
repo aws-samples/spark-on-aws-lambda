@@ -9,6 +9,9 @@ import os
 # Method to create Spark Session and print Spark configuration
 
 def spark_session():
+ """
+ Creating a spark session
+ """
  print("************ Definining Spark Session ************")
 
  aws_region = os.environ['AWS_REGION'] 
@@ -42,6 +45,10 @@ def spark_session():
 # Method to start Spark workload execution and load a Delta Lake on Amazon S3
  
 def spark_execution(spark_session):
+ """
+ Spark execution script. It is using environemnt variable for
+ input and output location
+ """
  print("************ Executing Workload ************")
  input_path = os.environ['input_path'] 
  target_path = os.environ['output_path']
