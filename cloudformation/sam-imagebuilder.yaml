@@ -123,7 +123,6 @@ Resources:
                 - echo Downloading requires source files from git
                 - git clone https://github.com/aws-samples/spark-on-aws-lambda.git
                 - cd spark-on-aws-lambda
-                - git checkout develop
                 - echo Build started on `date`
                 - echo Building the Docker image...          
                 - docker build -t $IMAGE_REPO_NAME:latest .
