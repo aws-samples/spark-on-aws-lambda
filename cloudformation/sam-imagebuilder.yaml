@@ -121,9 +121,9 @@ Resources:
             build:
               commands:
                 - echo Downloading requires source files from git
-                - wget -q https://raw.githubusercontent.com/aws-samples/spark-on-aws-lambda/main/Dockerfile -P ./
-                - wget -q https://raw.githubusercontent.com/aws-samples/spark-on-aws-lambda/main/spark-class -P ./
-                - wget -q https://raw.githubusercontent.com/aws-samples/spark-on-aws-lambda/main/sparkLambdaHandler.py -P ./    
+                - git clone https://github.com/aws-samples/spark-on-aws-lambda.git
+                - cd spark-on-aws-lambda
+                - git checkout develop
                 - echo Build started on `date`
                 - echo Building the Docker image...          
                 - docker build -t $IMAGE_REPO_NAME:latest .

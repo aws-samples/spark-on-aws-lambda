@@ -114,10 +114,19 @@ Resources:
           - Effect: Allow
             Action:
               - ecr:GetAuthorizationToken
+            Resource: '*'
+          - Effect: Allow
+            Action:
               - ecr:BatchCheckLayerAvailability
               - ecr:GetDownloadUrlForLayer
               - ecr:BatchGetImage
-            Resource: '*'
+            Resource:
+              Fn::Sub:
+                - "arn:aws:ecr:${Region}:${Account}:repository/${RepositoryName}"
+                - Region: !Select [3, !Split [".", !Ref ImageUri ]]
+                  Account: !Select [0, !Split [".", !Ref ImageUri ]]
+                  RepositoryName: !Select [1, !Split ["/", !Select [ 0, !Split [":", !Select [5, !Split [".", !Ref ImageUri ]]]]]]
+
           - Effect: Allow
             Action:
               - s3:ListBucket
