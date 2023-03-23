@@ -5,6 +5,14 @@ Parameters:
     Type: String
     Default: sparkonlambda
     Description: Prefix of the Image Repository to be created
+  Framework:
+    Type: String
+    Default: HUDI
+    Description: Framework jars to download
+    AllowedValues:
+      - HUDI
+      - DELTA
+      - ICEBERG
 
 Resources:
 
@@ -103,6 +111,8 @@ Resources:
             Value: !Sub ${AWS::AccountId}
           - Name: IMAGE_REPO_NAME
             Value: !Ref SparkOnLambdaECRRepository
+          - Name: FRAMEWORK
+            Value: !Ref Framework
       Name: !Sub 'spark-on-aws-lambda-build-${AWS::StackName}'
       QueuedTimeoutInMinutes: 10
       ServiceRole:
@@ -126,7 +136,7 @@ Resources:
                 - git checkout sam-changes
                 - echo Build started on `date`
                 - echo Building the Docker image...          
-                - docker build -t $IMAGE_REPO_NAME:latest .
+                - docker build -build-arg FRAMEWORK=$FRAMEWORK-t $IMAGE_REPO_NAME:latest .
                 - docker tag $IMAGE_REPO_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest      
             post_build:
               commands:

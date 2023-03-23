@@ -42,13 +42,13 @@ RUN chmod +x /tmp/download_jars.sh && \
 ENV PATH=${PATH}:${JAVA_HOME}/bin
 
 # Setting  up the ENV vars for local code, in AWS LAmbda you have to set Input_path and Output_path
-ENV input_path=""
-ENV output_path=""
+ENV INPUT_PATH=""
+ENV OUTPUT_PATH=""
 ENV AWS_ACCESS_KEY_ID=""
 ENV AWS_SECRET_ACCESS_KEY=""
 ENV AWS_REGION=""
 ENV AWS_SESSION_TOKEN=""
-ENV custom_sql=""
+ENV CUSTOM_SQL=""
 
 # spark-class file is setting the memory to 1 GB
 COPY spark-class $SPARK_HOME/bin/
