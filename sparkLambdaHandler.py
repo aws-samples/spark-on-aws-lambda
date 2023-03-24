@@ -34,15 +34,14 @@ def spark_submit(s3_bucket_script: str,input_script: str, event: dict)-> None:
     Submits a local Spark script using spark-submit.
     """
      # Set the environment variables for the Spark application
-    # os.environ["PYSPARK_SUBMIT_ARGS"] = "--master local pyspark-shell"
+    pyspark_submit_args = event.get('PYSPARK_SUBMIT_ARGS', '')
     # Source input and output if available in event
     input_path = event.get('INPUT_PATH','')
     output_path = event.get('OUTPUT_PATH', '')
     # Run the spark-submit command on the local copy of teh script
     try:
         logger.info(f'Spark-Submitting the Spark script {input_script} from {s3_bucket_script}')
-        subprocess.run(["spark-submit", "/tmp/spark_script.py" ],
-                       env=dict(os.environ,INPUT_PATH=input_path,OUTPUT_PATH=output_path))
+        subprocess.run(["spark-submit", "/tmp/spark_script.py"])
     except Exception as e :
         logger.error(f'Error Spark-Submit with exception: {e}')
     else:
@@ -60,9 +59,8 @@ def lambda_handler(event, context):
     logger.info("******************Start AWS Lambda Handler************")
     s3_bucket_script = os.environ['SCRIPT_BUCKET']
     input_script = os.environ['SPARK_SCRIPT']
-
-
-
+    os.environ['INPUT_PATH'] = event.get('INPUT_PATH','')
+    os.environ['OUTPUT_PATH'] = event.get('OUTPUT_PATH', '')
 
     s3_script_download(s3_bucket_script,input_script)
     
