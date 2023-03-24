@@ -63,7 +63,7 @@ Parameters:
   Command:
     Description: 'Optional: Command override for the image. This is not required'
     Type: 'CommaDelimitedList'
-    Default: sparkLambdaHandler.lambda_handler
+    Default: "/var/task/sparkLambdaHandler.lambda_handler"
   EntryPoint:
     Description: 'Optional: Entry Point override for the image'
     Type: 'CommaDelimitedList'
