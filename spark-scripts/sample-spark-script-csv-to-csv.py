@@ -12,7 +12,7 @@ target_path = os.environ['OUTPUT_PATH']
 # s3_bucket  = os.environ['s3_bucket']
 
 aws_region = os.environ['AWS_REGION']
-aws_access_key_id = os.environ['ACCESS_KEY_ID']
+aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID']
 aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY']
 session_token = os.environ['AWS_SESSION_TOKEN']
 
