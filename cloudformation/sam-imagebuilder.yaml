@@ -136,7 +136,7 @@ Resources:
                 - git checkout sam-changes
                 - echo Build started on `date`
                 - echo Building the Docker image...          
-                - docker build -build-arg FRAMEWORK=$FRAMEWORK-t $IMAGE_REPO_NAME:latest .
+                - docker build --build-arg FRAMEWORK=$FRAMEWORK -t $IMAGE_REPO_NAME:latest .
                 - docker tag $IMAGE_REPO_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest      
             post_build:
               commands:
