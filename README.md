@@ -28,7 +28,7 @@ At present, on Amazon EMR and AWS Glue, the PySpark script will need to be run o
 This AWS sample is intended to show an example of a container-based approach. This can be executed on AWS Lambda or AWS Batch for longer-running tasks.
 
 ### <ins>**Release**</ins>
-**Release 1** of the docker image will include AWS Lambda settings, Hadoop-AWS and aws-sdk-bundle libraries, and standalone Spark. To connect with Amazon S3, the docker container running on AWS Lambda is assisted by the hadoop-aws and aws-sdk-bundle libraries.
+**Release 0.1.0** of the docker image will include AWS Lambda settings, Hadoop-AWS and aws-sdk-bundle libraries, and standalone Spark. To connect with Amazon S3, the docker container running on AWS Lambda is assisted by the hadoop-aws and aws-sdk-bundle libraries.
 
 ####  DockerFile 
 <p>The DockerFile builds the image using an AWS based image for Python 3.8. During the build process, it installs PySpark, copies all the required files, and sets the credentials locally on the container. </p>
@@ -54,9 +54,11 @@ In this code sample, we are substituting a local shell script for the existing s
 #### spark-scripts
 <p>Spark-scripts folder will contain all the pyspark scripts for various target framework integration like Apache HUDI, Apache Iceberg and Delta lake table.</p>
 
-##### Spark_script_hudi.py
+##### sample-spark-script-csv-to-hudi-table.py
 <p> This script is a PySpark script that can be used to read a CSV file from an S3 location, add a timestamp column to it, and write it to a Hudi table in another S3 location. The script is designed to be run on AWS Lambda, and it includes configuration settings for running PySpark in a serverless environment. The script can be customized by setting environment variables and modifying the configuration settings to meet the specific needs of your PySpark application.</p> 
 
+####download_jar.sh
+<p>The shell script downloads all the required jar files for the ACID frameworks like Apache HUDI, Apache Iceberg and Apache Delta table. It is based on the FRAMEWORK argument in the docker file while building the image</p>
 
 ### <ins>VPC, Roles and Execution</ins>
 <p>In this framework, AWS Lambda can be hosted on an AWS VPC. The input file is on Amazon S3, and the corresponding AWS Lambda role should only have access to read the file. Deploy a Amazon S3 endpoint to the VPC so that the AWS Lambda script can access the Amazon S3 location. The AmazonLambdaTaskExecutionRolePolicy is the execution role for EC2 Docker containers, and for Amazon S3 access, attached actions like Amazon S3: Get*, S3: List*, and S3: PutObject Access are available along with the resource name.  </p>
@@ -67,7 +69,7 @@ In this code sample, we are substituting a local shell script for the existing s
 
 1. Create a Docker file with an AWS base image, public.ecr.aws/lambda/python:3.8. The Dockerfile has the entrypoint to the Lambda_Hnadler and the command to execute the script when triggered.
 2. Locally create a Docker image and container. Use AWS cloud9, AWS workspace, or a local PC for this step.
-3. Create an Amazon ECR Repository and push the container to the repository. Manually upload to the AWS ECR repository or use the script. aws-ecr-repository-push.sh.
+3. Create an Amazon ECR Repository and push the container to the repository. Manually upload to the AWS ECR repository or use the shell script aws-ecr-repository-push.sh or SAM template build and upload.
 4. Create an AWS Lambda function with the role AmazonLambdaTaskExecutionRolePolicy. Increase the memory and timeout settings to suit the file size. The environmental variable can be set if dynamic input is required.
 5. Choose the option to use a container image for AWS Lambda.
 6. Create a sample event and trigger the AWS Lambda script.
@@ -79,9 +81,9 @@ Building a docker and pushing the image to the Amazon ECR registry. You can use 
 
 Browse to the Docker folder with all the required files. Build the Docker image locally by executing the Dockerfile locally.
 
-#Browse to the local folder
+#Browse to the local folder and run the docker build along with the desired FRAMEWORK, HUDI, DELTA and ICEBERG
 ```
-docker build -t sparkonlambda .
+docker build --build-arg FRAMEWORK=DELTA -t sparkonlambda .
 ```
 
 ### Run the docker 
