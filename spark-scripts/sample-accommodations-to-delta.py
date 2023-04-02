@@ -1,7 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.types import *
 from pyspark.sql.functions import current_timestamp
-from pyspark.sql.types import IntegerType, StringType
 import sys
 import os
 
@@ -19,7 +18,7 @@ import os
   Create the below table in Athena
 
   CREATE EXTERNAL TABLE accommodations_delta
-  LOCATION 's3://ibmsample/sparkonlambda/delta/'
+  LOCATION 's3://YOUR_BUCKET/YOUR_PATH' 
   TBLPROPERTIES (
       'table_type'='DELTA'
   );
