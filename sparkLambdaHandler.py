@@ -44,6 +44,7 @@ def spark_submit(s3_bucket_script: str,input_script: str, event: dict)-> None:
         subprocess.run(["spark-submit", "/tmp/spark_script.py", "--event", json.dumps(event)], check=True)
     except Exception as e :
         logger.error(f'Error Spark-Submit with exception: {e}')
+        raise e
     else:
         logger.info(f'Script {input_script} successfully submitted')
 
