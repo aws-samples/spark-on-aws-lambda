@@ -1,0 +1,56 @@
+[Please the refer the WIKI page](https://github.com/aws-samples/spark-on-aws-lambda/wiki/Cloudformation)
+
+### Introduction
+AWS Serverless Application Model (SAM) is a framework for building serverless applications on AWS. It provides a simplified way to define the Amazon API Gateway APIs, AWS Lambda functions, and Amazon DynamoDB tables needed by your serverless application. One key advantage of SAM is that it simplifies the deployment process for AWS Lambda functions by abstracting away many of the complexities of AWS CloudFormation. With SAM, you can package your Lambda functions and other resources into a single deployment package, and then deploy that package using simple AWS CLI commands or through a pipeline in AWS CodePipeline.
+
+Overall, AWS SAM and AWS Lambda provide an easy and efficient way to build and deploy serverless applications. Using container images for AWS Lambda deployment makes it even easier to package and deploy your code, while also providing flexibility and consistency across different environments. The SAM template is available publicly through [Application Serverless Repository](https://serverlessrepo.aws.amazon.com/applications/us-east-1/918254213187/SparkOnLambda)
+
+This document provides instructions for deploying an AWS SAM (Serverless Application Model) application with a Docker image that is built and pushed to Amazon ECR (Elastic Container Registry) using AWS CodeBuild.
+
+### 1. Deploy the docker image builder stack:
+
+Clone the Github repository and change the directory to cloudformation folder.
+`git clone [<repository-name>](https://github.com/aws-samples/spark-on-aws-lambda.git)`
+
+Run the below command with stack-name your choice
+
+`sam deploy --template-file sam-imagebuilder.yaml --stack-name spark-on-lambda-image-builder --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM --resolve-s3`
+
+This command deploys a AWS CloudFormation stack with the name "spark-on-lambda-image-builder" and creates a AWS CodeBuild project that builds and pushes the Docker image with the latest tag to ECR. The --resolve-s3 flag resolves S3 bucket and key placeholders in the SAM template to actual S3 object locations.
+
+Copy the repository URI from the output of the image builder stack:
+After the stack has been successfully deployed, copy the repository URI(spark-on-lambda-image-builder) that is displayed in the output of the stack.
+
+### 2. Create AWS Lambda- Package and upload the AWS SAM application:
+
+`sam package --resolve-s3  --template-file sam-template.yaml --output-template-file packaged-template.yaml --region <your region> --force-upload --image-repository <repo_uri>`
+
+This command packages the AWS SAM application using the CloudFormation template file "sam-template.yaml" and uploads it to Amazon S3. The --resolve-s3 flag resolves S3 bucket and key placeholders in the AWS SAM template to actual Amazon S3 object locations. The --force-upload flag forces SAM to upload the packaged template even if it already exists. The --image-repository flag specifies the ECR repository URI.
+
+Replace <your region> with the AWS region where you want to deploy the application and <repo_uri> with the repository URI that you copied from the output of the image builder stack.
+
+An output file packaged-template.yaml will be created in the local directory.
+
+### Publish the SAM application:
+
+`sam publish --template packaged-template.yaml`
+
+This command publishes the SAM application to the AWS Serverless Application Repository. The **packaged-template.yaml** file is the output from the previous step.
+
+You will now have AWS Lambda function with the spark on AWS Lambda container.
+
+### Alternative Solution
+### To deploy directly use sam deploy instead of going through the AWS Application Serverless Repository
+`sam deploy --template-file sam-template.yaml --stack-name spark-on-lambda-stack --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM --resolve-s3 --image-repository <repo-uri> --parameter-overrides  'ParameterKey=ScriptBucket,ParameterValue=abc ParameterKey=SparkScript,ParameterValue=opt/spark.py ParameterKey=ImageUri,ParameterValue=1111111.dkr.ecr.us-east-1.amazonaws.com/sparkonlambda-spark-on-lambda-image-builder:latest'`
+
+
+### Security considerations
+Securing Docker images is an essential aspect of maintaining the security of any software application. One way to enhance the security of a Docker image is to ensure that it is updated frequently with the latest security patches and updates. 
+
+To achieve this, it is important to use a secure, reliable CI/CD using the code-build pipeline-[sam-imagebuilder.yaml](https://github.com/aws-samples/spark-on-aws-lambda/blob/develop/cloudformation/sam-imagebuilder.yaml) that can automate the process of rebuilding and pushing Docker images when security updates are available or on frequency basis. 
+
+By following these best practices, organizations can help to ensure that their Docker images are as secure as possible, reducing the risk of security breaches and maintaining the reliability of their software applications.
+
+
+
+

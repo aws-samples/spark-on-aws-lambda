@@ -1,0 +1,176 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Metadata:
+  'AWS::ServerlessRepo::Application':
+    Name: SparkOnLambda
+    Description: 'The Application creates AWS Lambda with Spark. Run your spark loads 75 to 80% less cost or FREE!! if you are within AWS Lambda free tier limits'
+    Author: 'AWS Project Bluebear'
+    SpdxLicenseId: MIT-0
+    LicenseUrl: ../LICENSE.txt
+    ReadmeUrl: ../README.md
+    Labels:
+      - spark
+      - lambda
+      - pyspark
+      - serverless
+    HomePageUrl: 'https://github.com/aws-samples/spark-on-aws-lambda'
+    SemanticVersion: 1.2.0
+    SourceCodeUrl: 'https://github.com/aws-samples/spark-on-aws-lambda'
+
+Parameters:
+  ImageUri:
+    Description: 'Mandatory: ECR Uri for the image. If not present, then create and push using the sam-imagebuilder.yaml in the github https://github.com/aws-samples/spark-on-aws-lambda '
+    Type: String
+    Default: ''
+  ScriptBucket:
+    Type: String
+    Description: 'Mandatory: Amazon S3 Bucket name where the spark script is stored. Just the bucket name e.g. bucket1'
+  SparkScript:
+    Type: String
+    Description: 'Mandatory: Amazon S3 key where the spark script resides. Start without the /.eg: script/location/name.py'
+  LambdaFunctionPrefix:
+    Description: 'Optional: This is the prefix for the name of the lambda function that will be created. This name must satisfy the pattern ^[a-z0-9-_]{1,64}$'
+    Type: String
+    Default: SparkOnAWSLambda
+  LambdaTimeout:
+    Description: 'Optional: Maximum Lambda invocation runtime in seconds. (min 1 - 900 max)'
+    Default: 900
+    Type: Number
+  LambdaMemory:
+    Description: 'Optional: Lambda memory in MB (min 128 - 3008 max).'
+    Default: 3008
+    Type: Number
+  SparkLambdapermissionPolicyArn:
+    Description: 'Optional: Arn of the policy that contains the permissions your spark job will need to run successfully'
+    Type: String
+    Default: ''
+  AttachToVpc:
+    Type: String
+    Description: 'Mandatory: Set True or False to imply VPC Connectivity'
+    Default: False
+    AllowedValues:
+      - True
+      - False
+  SecurityGroupIds:
+    Description: 'Optional: One or more SecurityGroup IDs corresponding to the SecurityGroup that should be applied to the Lambda function. (e.g. sg1,sg2,sg3).Only used if AttachToVpc is True'
+    Type: 'CommaDelimitedList'
+    Default: ''
+  SubnetIds:
+    Description: 'Optional: One or more Subnet IDs corresponding to the Subnet that the Lambda function can use to access you data source. (e.g. subnet1,subnet2).Only used if AttachToVpc is True'
+    Type: 'CommaDelimitedList'
+    Default: ''
+  
+  Command:
+    Description: 'Optional: Command override for the image. This is not required'
+    Type: 'CommaDelimitedList'
+    Default: "/var/task/sparkLambdaHandler.lambda_handler"
+  EntryPoint:
+    Description: 'Optional: Entry Point override for the image'
+    Type: 'CommaDelimitedList'
+    Default: ''
+  WorkingDirectory:
+    Description: 'Optional: Command override for the image'
+    Type: 'String'
+    Default: ''
+
+Conditions:
+  NeedsVPC:  !Equals [ !Ref AttachToVpc, 'True' ]
+  HasAdditionalPolicy: !Not  [ !Equals [ '', !Ref SparkLambdapermissionPolicyArn ] ]
+  NeedsImageBuild: !Not [ !Equals [ !Ref ImageUri, '' ]]
+  HasEntryPoint: !Not  [ !Equals [ '' , !Join [ ',',  !Ref EntryPoint ] ] ]
+  HasWorkingDirectory: !Not  [ !Equals [ '', !Ref WorkingDirectory ] ]
+
+Resources:
+
+  LambdaRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      Description: 'Role used by the lambda running spark'
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+        - !If
+            - "HasAdditionalPolicy"
+            - !Ref SparkLambdapermissionPolicyArn
+            - !Ref "AWS::NoValue"
+        - !If
+            - NeedsVPC
+            - "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+            - !Ref "AWS::NoValue"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - 'lambda.amazonaws.com'
+            Action: 'sts:AssumeRole'
+
+  LambdaPolicy:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyName: !Sub 'SparkOnLmandaDefaulPolicy-${AWS::StackName}'
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action:
+              - ecr:GetAuthorizationToken
+            Resource: '*'
+          - Effect: Allow
+            Action:
+              - ecr:BatchCheckLayerAvailability
+              - ecr:GetDownloadUrlForLayer
+              - ecr:BatchGetImage
+            Resource:
+              Fn::Sub:
+                - "arn:aws:ecr:${Region}:${Account}:repository/${RepositoryName}"
+                - Region: !Select [3, !Split [".", !Ref ImageUri ]]
+                  Account: !Select [0, !Split [".", !Ref ImageUri ]]
+                  RepositoryName: !Select [1, !Split ["/", !Select [ 0, !Split [":", !Select [5, !Split [".", !Ref ImageUri ]]]]]]
+
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+            Resource: !Sub 'arn:aws:s3:::${ScriptBucket}'
+          - Effect: Allow
+            Action:
+              - s3:Get*
+            Resource: !Sub 'arn:aws:s3:::${ScriptBucket}/${SparkScript}'
+      Roles:
+        - !Ref LambdaRole
+
+  SparkLambda:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      PackageType: Image
+      FunctionName: !Sub '${LambdaFunctionPrefix}-${AWS::StackName}'
+      ImageUri: !Ref ImageUri
+      ImageConfig:
+        Command: !Ref Command
+        EntryPoint:
+          !If
+            - HasEntryPoint
+            - !Ref EntryPoint
+            - !Ref "AWS::NoValue"
+        WorkingDirectory:
+          !If
+            - HasWorkingDirectory
+            - !Ref WorkingDirectory
+            - !Ref "AWS::NoValue"
+      Description: "Lambda to run spark containers"
+      Timeout: !Ref LambdaTimeout
+      MemorySize: !Ref LambdaMemory
+      Role: !GetAtt LambdaRole.Arn
+      VpcConfig:
+        !If
+          - NeedsVPC
+          -
+            SecurityGroupIds: !Ref SecurityGroupIds
+            SubnetIds: !Ref SubnetIds
+          - !Ref "AWS::NoValue"
+      Environment:
+        Variables:
+          SCRIPT_BUCKET: !Ref ScriptBucket
+          SPARK_SCRIPT: !Ref SparkScript
+          #INPUT_PATH: !Ref InputPath
+          #OUTPUT_PATH: !Ref OutputPath
+
