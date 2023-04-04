@@ -1,5 +1,7 @@
 <h1><p><u>Contents</u></p></h1>
 
+### Please refer the Wikipage for latest updates. https://github.com/aws-samples/spark-on-aws-lambda/wiki
+README.MD will be updated soon
 
 ### Introduction
 Apache Spark on AWS Lambda is a standalone installation of Spark running on AWS Lambda. The Spark is packaged in a Docker container, and AWS Lambda is used to execute the Spark image. The Spark Image pulls in a PySpark script. Currently, AWS services like Amazon EMR, AWS Glue, or Amazon EMR serverless are required for event driven or streaming smaller files to use Apache Spark. When processing smaller files under 500 MB in size per payload, these services incur resource overhead costs and operate more slowly(slower than pandas). This container-based strategy lowers overhead costs associated with spinning up numerous nodes while processing the data on a single node. Use Apache Spark on AWS Lambda for event-based pipelines with smaller files if you're seeking for a less expensive choice, according to customers. 
@@ -97,7 +99,7 @@ docker build --build-arg FRAMEWORK=DELTA -t sparkonlambda .
 #Authenticate the docker CLI with Amazon ECR
 
 ```
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <account>.dkr.ecr.us-east-1.amazonaws.com</code>
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <accountnumber>.dkr.ecr.us-east-1.amazonaws.com
 ```
 
 ### Create the Amazon ECR repository using command line
@@ -110,7 +112,7 @@ aws ecr create-repository --repository-name sparkonlambda --image-scanning-confi
 
 
 ```
-docker tag  sparkonlambda:latest 123456789012.dkr.ecr.us-east-1.amazonaws.com/sparkonlambda:latest
+docker tag  sparkonlambda:latest <accountnumber>.dkr.ecr.us-east-1.amazonaws.com/sparkonlambda:latest
 ```
 ###  Amazon ECR push to repository
 
