@@ -10,11 +10,11 @@ Apache Spark on AWS Lambda is a standalone installation of Spark running on AWS 
 
 The Spark on AWS Lambda feature allows you to run Spark applications on AWS Lambda in a similar way to running Spark on Amazon EMR and EMR serverless. This feature enables you to submit a Spark script stored in an Amazon S3 bucket to run on AWS Lambda, by just adjusting the AWS Lambda Environment variable.
 
-When you submit a Spark script to AWS Lambda, a AWS Lambda function is created for the script, and a container is deployed to run the function. The container contains a version of Spark that is compatible with AWS Lambda, as well as any dependencies that your Spark script requires.
+When you submit a Spark script to AWS Lambda, an AWS Lambda function is created for the script, and a container is deployed to run the function. The container contains a version of Spark that is compatible with AWS Lambda, as well as any dependencies that your Spark script requires.
 
 Once the container is deployed on AWS Lambda, it remains the same until the function is updated or deleted. This means that subsequent invocations of the function will use the same AWS Lambda Function, which can help improve performance by reducing the time required to start up and initialize Spark(if the Lambda is warm.
 
-The Spark logs will part of the AWS Lambda logs stored in AWS Cloudwatch.
+The Spark logs will be part of the AWS Lambda logs stored in AWS Cloudwatch.
 
 ![Architecture](https://github.com/aws-samples/spark-on-aws-lambda/blob/main/images/Github-diagram.jpg)
 ***
@@ -22,7 +22,7 @@ The Spark logs will part of the AWS Lambda logs stored in AWS Cloudwatch.
 ### Current Challenge
 At present, on Amazon EMR and AWS Glue, the PySpark script will need to be run on each node after a JVM spin-up, in contrast to other frameworks like Pandas, which do not incur this overhead cost because running on single machine. For small files under 500MB, Pandas outperforms Spark, and Spark takes longer due to the JVM spin-up cost. The ACID frameworks like Apache HUDI and Apache Iceberg are only Spark compatible, and none are Pandas compatible. When files are small and there is a  requirement for the ACID framework on Amazon S3 then Spark on AWS Lambda shines. Spark on AWS Lambda will be a great option for these use cases.
 
-1. When utilizing AWS Glue or Amazon EMR, the JVM spin-up cost for Spark is considerable, making it slower and more expensive than Pandas to handle smaller files. Pandas performs better on small files than Spark.  The JVM  Costs is reduced and processing is expedited using this Framework.
+1. When utilizing AWS Glue or Amazon EMR, the JVM spin-up cost for Spark is considerable, making it slower and more expensive than Pandas to handle smaller files. Pandas performs better on small files than Spark.  The JVM  Cost is reduced and processing is expedited using this Framework.
 2. Event-driven and smaller payloads with less frequency coming from AWS Managed Kafka, and AWS Kinesis triggers are ideal use cases. The framework is cost-effective for less frequent payloads and can load data to Apache HUDI or Iceberg tables on Amazon S3.
 3. Batch processing small files saves time and money on spark on AWS Lambda in comparison with Amazon EMR( with minimum of 3 nodes). The framework can be hosted on AWS Lambda for 15-minute loads.
 4. Run different versions of Spark workloads in parallel. (At present, you need a separate cluster on Amazon EMR and AWS Glue, which means a minimum of 6 nodes).
@@ -35,7 +35,7 @@ This AWS sample is intended to show an example of a container-based approach.
 <p>The DockerFile builds the image using an AWS based image for Python 3.8. During the build process, it installs PySpark, copies all the required files, and sets the credentials locally on the container. </p>
 
 #### sparkLambdaHandler.py 
-<p>This script is a invoked in AWS Lambda when an event is triggered. The script downloads a Spark script from an S3 bucket, sets environment variables for the Spark application, and runs the spark-submit command to execute the Spark script.
+<p>This script is invoked in AWS Lambda when an event is triggered. The script downloads a Spark script from an S3 bucket, sets environment variables for the Spark application, and runs the spark-submit command to execute the Spark script.
 Here is a summary of the main steps in the script:
 1. The lambda_handler function is the entry point for the Lambda function. It receives an event object and a context object as parameters.
 2. The s3_bucket_script and input_script variables are used to specify the Amazon S3 bucket and object key where the Spark script is located.
@@ -59,7 +59,7 @@ In this code sample, we are substituting a local shell script for the existing s
 <p> This script is a PySpark script that can be used to read a CSV file from an S3 location, add a timestamp column to it, and write it to a Hudi table in another Amazon S3 location. The script is designed to be run on AWS Lambda, and it includes configuration settings for running PySpark in a serverless environment. The script can be customized by setting environment variables and modifying the configuration settings to meet the specific needs of your PySpark application.</p> 
 
 ##### sample-spark-script-csv-to-iceberg-table.py
-<p> This script is a PySpark script that can be used to read a CSV file from an S3 location, add a timestamp column to it, and write it to a Iceberg table in another Amazon S3 location.</p> 
+<p> This script is a PySpark script that can be used to read a CSV file from an S3 location, add a timestamp column to it, and write it to an Iceberg table in another Amazon S3 location.</p> 
 
 
 ##### sample-spark-script-csv-to-delta-table.py
@@ -69,7 +69,7 @@ In this code sample, we are substituting a local shell script for the existing s
 <p>The shell script downloads all the required jar files for the ACID frameworks like Apache HUDI, Apache Iceberg and Apache Delta table. It is based on the FRAMEWORK argument in the docker file while building the image</p>
 
 ### <ins>VPC, Roles and Execution</ins>
-<p>In this framework, AWS Lambda can be hosted on an AWS VPC. The input file is on Amazon S3, and the corresponding AWS Lambda role should only have access to read the file. Deploy a Amazon S3 endpoint to the VPC so that the AWS Lambda script can access the Amazon S3 location. The AmazonLambdaTaskExecutionRolePolicy is the execution role for EC2 Docker containers, and for Amazon S3 access, attached actions like Amazon S3: Get*, S3: List*, and S3: PutObject Access are available along with the resource name.  </p>
+<p>In this framework, AWS Lambda can be hosted on an AWS VPC. The input file is on Amazon S3, and the corresponding AWS Lambda role should only have access to read the file. Deploy an Amazon S3 endpoint to the VPC so that the AWS Lambda script can access the Amazon S3 location. The AmazonLambdaTaskExecutionRolePolicy is the execution role for EC2 Docker containers, and for Amazon S3 access, attached actions like Amazon S3: Get*, S3: List*, and S3: PutObject Access are available along with the resource name.  </p>
 
 
 #### <p><u>High level steps to build AWS Lambda using Spark container</u></p>
