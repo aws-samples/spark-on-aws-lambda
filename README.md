@@ -53,7 +53,7 @@ In this code sample, we are substituting a local shell script for the existing s
 **Note :** Updates are required if JAVA_HOME and version have changed.
 
 #### spark-scripts
-<p>Spark-scripts folder will contain all the pyspark scripts for various target framework integration like Apache HUDI, Apache Iceberg and Delta lake table.</p>
+<p>Spark-scripts folder will contain all the pyspark scripts for various target framework integration like Apache HUDI, Apache Iceberg and Delta lake table. Note : Please specifiy S3a file path for all the input and output locations</p>
 
 ##### sample-spark-script-csv-to-hudi-table.py
 <p> This script is a PySpark script that can be used to read a CSV file from an S3 location, add a timestamp column to it, and write it to a Hudi table in another Amazon S3 location. The script is designed to be run on AWS Lambda, and it includes configuration settings for running PySpark in a serverless environment. The script can be customized by setting environment variables and modifying the configuration settings to meet the specific needs of your PySpark application.</p> 
