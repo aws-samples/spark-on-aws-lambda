@@ -62,7 +62,7 @@ def spark_script():
     df = df.withColumn("last_upd_timestamp", current_timestamp())
     df.printSchema()
 
-    print("Started Writing the dataframe file to Target hudi table ", output_path)
+    print("Started Writing the dataframe file to Target delta table ", output_path)
     df.write.format("delta").mode("append").save(output_path)
 
 if __name__ == '__main__':
