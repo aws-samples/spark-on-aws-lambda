@@ -6,11 +6,11 @@
 README.MD will be updated soon by the contributors.
 
 ### Introduction
-Apache Spark on AWS Lambda is a standalone installation of Spark running on AWS Lambda. The Spark is packaged in a Docker container, and AWS Lambda is used to execute the Spark image. The Spark Image pulls in a PySpark script.  When processing smaller files under 500 MB in size per payload, some of cluster based services incurs JVM startup cost. This container-based strategy lowers overhead costs associated with spinning up numerous nodes while processing the data on a single node. Use Apache Spark on AWS Lambda for event-based pipelines with smaller files if you're seeking for a less expensive choice, according to customers. 
+Apache Spark on AWS Lambda(SoAL) framework is a standalone installation of Spark running on AWS Lambda. The Spark is packaged in a Docker container, and AWS Lambda is used to execute the Spark image. The Spark Image pulls in a PySpark script.  When processing smaller files under 500 MB in size per payload, some of cluster based services incurs JVM startup cost. This container-based strategy lowers overhead costs associated with spinning up numerous nodes while processing the data on a single node. Use SoAL framework for event-based pipelines with smaller files if you're seeking for a less expensive choice, according to customers. 
 
 ### Architecture
 
-The Spark on AWS Lambda feature allows you to run Spark applications on AWS Lambda in a similar way to running Spark on Amazon EMR and EMR serverless. This feature enables you to submit a Spark script stored in an Amazon S3 bucket to run on AWS Lambda, by just adjusting the AWS Lambda Environment variable.
+The Spark on AWS Lambda(SoAL) framework feature allows you to run Spark applications on AWS Lambda in a similar way to running Spark on Amazon EMR and EMR serverless. This feature enables you to submit a Spark script stored in an Amazon S3 bucket to run on AWS Lambda, by just adjusting the AWS Lambda Environment variable.
 
 When you submit a Spark script to AWS Lambda, an AWS Lambda function is created for the script, and a container is deployed to run the function. The container contains a version of Spark that is compatible with AWS Lambda, as well as any dependencies that your Spark script requires.
 
@@ -22,11 +22,11 @@ The Spark logs will be part of the AWS Lambda logs stored in AWS Cloudwatch.
 ***
 
 ### Current Challenge
-At present, on Amazon EMR and AWS Glue, the PySpark script will need to be run on each node after a JVM spin-up, in contrast to other frameworks like Pandas, which do not incur this overhead cost because running on single machine. For small files under 500MB, Pandas outperforms Spark, and Spark takes longer due to the JVM spin-up cost. The ACID frameworks like Apache HUDI and Apache Iceberg are only Spark compatible, and none are Pandas compatible. When files are small and there is a  requirement for the ACID framework on Amazon S3 then Spark on AWS Lambda shines. Spark on AWS Lambda will be a great option for these use cases.
+At present, on Amazon EMR and AWS Glue, the PySpark script will need to be run on each node after a JVM spin-up, in contrast to other frameworks like Pandas, which do not incur this overhead cost because running on single machine. For small files under 500MB, Pandas outperforms Spark, and Spark takes longer due to the JVM spin-up cost. The ACID frameworks like Apache HUDI and Apache Iceberg are only Spark compatible, and none are Pandas compatible. When files are small and there is a  requirement for the ACID framework on Amazon S3 then SoAL framework shines. SoAL framework will be a great option for these use cases.
 
 1. When utilizing AWS Glue or Amazon EMR, the JVM spin-up cost for Spark is considerable, making it slower and more expensive than Pandas to handle smaller files. Pandas performs better on small files than Spark.  The JVM  Cost is reduced and processing is expedited using this Framework.
 2. Event-driven and smaller payloads with less frequency coming from AWS Managed Kafka, and AWS Kinesis triggers are ideal use cases. The framework is cost-effective for less frequent payloads and can load data to Apache HUDI or Iceberg tables on Amazon S3.
-3. Batch processing small files saves time and money on spark on AWS Lambda in comparison with Amazon EMR( with minimum of 3 nodes). The framework can be hosted on AWS Lambda for 15-minute loads.
+3. Batch processing small files saves time and money on in comparison with Amazon EMR( with minimum of 3 nodes). The framework can be hosted on AWS Lambda for 15-minute loads.
 4. Run different versions of Spark workloads in parallel. (At present, you need a separate cluster on Amazon EMR and AWS Glue, which means a minimum of 6 nodes).
 
 This AWS sample is intended to show an example of a container-based approach. 
