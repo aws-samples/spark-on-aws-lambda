@@ -35,13 +35,15 @@ def spark_submit(s3_bucket_script: str,input_script: str, event: dict)-> None:
     """
      # Set the environment variables for the Spark application
     pyspark_submit_args = event.get('PYSPARK_SUBMIT_ARGS', '')
+    glue_home="/var/lang/external/aws-glue-libs-master/"
     # Source input and output if available in event
     input_path = event.get('INPUT_PATH','')
     output_path = event.get('OUTPUT_PATH', '')
     # Run the spark-submit command on the local copy of teh script
     try:
         logger.info(f'Spark-Submitting the Spark script {input_script} from {s3_bucket_script}')
-        subprocess.run(["spark-submit", "/tmp/spark_script.py", "--event", json.dumps(event)], check=True)
+        #subprocess.run(["spark-submit", "/tmp/spark_script.py", "--event", json.dumps(event)], check=True)
+        subprocess.run([glue_home+"/bin/gluesparksubmit", "/tmp/spark_script.py"])
     except Exception as e :
         logger.error(f'Error Spark-Submit with exception: {e}')
         raise e
