@@ -4,11 +4,9 @@ import logging
 import os
 import sys
 
-import boto3
-
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col
-from pyspark.sql.types import StructType, IntegerType, StringType, TimestampType
+
+from glue_functions import get_table, build_schema_for_table, query_table
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -40,44 +38,7 @@ logger.addHandler(handler)
 
 """
 
-
-def get_table(db_name, table_name):
-    glue = boto3.client('glue', region_name='us-east-1')
-
-    response = glue.get_table(
-        DatabaseName=db_name,
-        Name=table_name
-    )
-    return response
-
-
-def build_schema_for_table(glue_table):
-    # Extract columns and data types from the response
-    columns = glue_table['Table']['StorageDescriptor']['Columns']
-
-    # Convert Glue schema to PySpark schema
-    schema = StructType()
-    for column in columns:
-        dtype = column['Type']
-        if dtype == 'string':
-            spark_dtype = 'StringType()'
-        elif dtype == 'int':
-            spark_dtype = 'IntegerType()'
-        elif dtype == "timestamp":
-            spark_dtype = 'TimestampType()'
-        # Add more data type mappings as needed
-        else:
-            spark_dtype = 'StringType()'  # default to StringType for simplicity
-        schema.add(column['Name'], eval(spark_dtype))
-
-    return schema
-
-
-def query_table(spark_session, s3_location, schema):
-    df = spark_session.read.schema(schema).format("delta").parquet(s3_location)
-    df.printSchema()
-
-    df.orderBy(col("price").desc()).show()
+AWS_REGION = 'us-east-1'
 
 
 def main(db_name, table_name):
@@ -101,13 +62,11 @@ def main(db_name, table_name):
         .getOrCreate()
 
     logger.info(f"------> Retrieving Glue table {table_name} from {db_name}")
-    glue_table = get_table(db_name, table_name)
-
-    table_location = glue_table['Table']['StorageDescriptor']['Location']
-    table_location = table_location.replace("s3://", "s3a://")
+    glue_table = get_table(db_name, table_name, aws_region=AWS_REGION)
 
     table_schema = build_schema_for_table(glue_table)
 
+    table_location = glue_table['Table']['StorageDescriptor']['Location']
     query_table(spark_session=spark, s3_location=table_location, schema=table_schema)
 
 
