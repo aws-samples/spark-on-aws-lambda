@@ -23,7 +23,7 @@ RUN yum update -y && \
     yum -y versionlock add java-1.8.0-openjdk-1.8.0.362.b08-0.amzn2.0.1.x86_64 && \
     yum -y install java-1.8.0-openjdk && \
     pip install --upgrade pip && \
-    pip install pyspark==$PYSPARK_VERSION && \
+    pip install pyspark==$PYSPARK_VERSION boto3==1.28.27 && \
     yum clean all
 
 
