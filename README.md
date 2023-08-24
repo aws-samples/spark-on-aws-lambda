@@ -3,7 +3,7 @@
 ### Please refer the Wikipage for latest updates. https://github.com/aws-samples/spark-on-aws-lambda/wiki
 ### Disclaimer: At present AWS team is not planning to support the Github. The support model is open-source MIT-0 license.
 
-README.MD will be updated soon by the contributors.
+
 
 ### Introduction
 Apache Spark on AWS Lambda(SoAL) framework is a standalone installation of Spark running on AWS Lambda. The Spark is packaged in a Docker container, and AWS Lambda is used to execute the Spark image. The Spark Image pulls in a PySpark script.  When processing smaller files under 500 MB in size per payload, some of cluster based services incurs JVM startup cost. This container-based strategy lowers overhead costs associated with spinning up numerous nodes while processing the data on a single node. Use SoAL framework for event-based pipelines with smaller files if you're seeking for a less expensive choice, according to customers. 
