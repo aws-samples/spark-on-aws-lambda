@@ -6,7 +6,7 @@ ARG HADOOP_VERSION=3.2.4
 ARG AWS_SDK_VERSION=1.11.901
 ARG PYSPARK_VERSION=3.3.0
 
-#FRAMEWORK will passed during the Docker build 
+#FRAMEWORK will passed during the Docker build. For Apache Iceberg in somecase downgrading PYSPARK_VERSION to 3.2.0 will be good
 ARG FRAMEWORK
 ARG DELTA_FRAMEWORK_VERSION=2.2.0
 ARG HUDI_FRAMEWORK_VERSION=0.12.2
