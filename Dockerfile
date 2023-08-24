@@ -23,7 +23,7 @@ RUN yum update -y && \
     yum -y versionlock add java-1.8.0-openjdk-1.8.0.362.b08-0.amzn2.0.1.x86_64 && \
     yum -y install java-1.8.0-openjdk && \
     pip install --upgrade pip && \
-    pip install pyspark==$PYSPARK_VERSION && \
+    pip install pyspark==$PYSPARK_VERSION boto3==1.28.27 && \
     yum clean all
 
 
@@ -31,11 +31,14 @@ RUN yum update -y && \
 ENV SPARK_HOME="/var/lang/lib/python3.8/site-packages/pyspark"
 ENV PATH=$PATH:$SPARK_HOME/bin
 ENV PATH=$PATH:$SPARK_HOME/sbin
-ENV PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.9-src.zip:$PYTHONPATH
+ENV PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.9-src.zip:/home/glue_functions:$PYTHONPATH
 ENV PATH=$SPARK_HOME/python:$PATH
 
 
 COPY download_jars.sh /tmp
+COPY libs/glue_functions /home/glue_functions
+RUN chmod -R 755 /home/glue_functions
+
 RUN chmod +x /tmp/download_jars.sh && \
     /tmp/download_jars.sh $FRAMEWORK $SPARK_HOME $HADOOP_VERSION $AWS_SDK_VERSION $DELTA_FRAMEWORK_VERSION $HUDI_FRAMEWORK_VERSION $ICEBERG_FRAMEWORK_VERSION $ICEBERG_FRAMEWORK_SUB_VERSION
 
