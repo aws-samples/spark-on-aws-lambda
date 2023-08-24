@@ -6,11 +6,12 @@
 
 
 ### Introduction
+
 Apache Spark on AWS Lambda(SoAL) framework is a standalone installation of Spark running on AWS Lambda. The Spark is packaged in a Docker container, and AWS Lambda is used to execute the Spark image. The Spark Image pulls in a PySpark script.  When processing smaller files under 500 MB in size per payload, some of cluster based services incurs JVM startup cost. This container-based strategy lowers overhead costs associated with spinning up numerous nodes while processing the data on a single node. Use SoAL framework for event-based pipelines with smaller files if you're seeking for a less expensive choice, according to customers. 
 
 ### Architecture
 
-The Spark on AWS Lambda(SoAL) framework feature allows you to run Spark applications on AWS Lambda in a similar way to running Spark on Amazon EMR and EMR serverless. This feature enables you to submit a Spark script stored in an Amazon S3 bucket to run on AWS Lambda, by just adjusting the AWS Lambda Environment variable.
+The Spark on AWS Lambda(SoAL) framework feature allows you to run Spark applications on AWS Lambda in a similar way to running Spark on Amazon EMR and EMR Serverless. This feature enables you to submit a Spark script stored in an Amazon S3 bucket to run on AWS Lambda, by just adjusting the AWS Lambda Environment variable.
 
 When you submit a Spark script to AWS Lambda, an AWS Lambda function is created for the script, and a container is deployed to run the function. The container contains a version of Spark that is compatible with AWS Lambda, as well as any dependencies that your Spark script requires.
 
