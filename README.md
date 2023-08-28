@@ -88,7 +88,7 @@ This script serves as a foundational tool for developers and data engineers work
    and read tables. The schema can be capture by AWS Glue crawler.</p>
 
 ####download_jar.sh
-<p>The shell script downloads all the required jar files for the ACID frameworks like Apache HUDI, Apache Iceberg and Apache Delta table. It is based on the FRAMEWORK argument in the docker file while building the image</p>
+<p>The shell script downloads all the required jar files for the ACID frameworks like Apache HUDI, Apache Iceberg and Apache Delta table. It is based on the FRAMEWORK argument in the docker file while building the image Note : Added code for downloading jars for Snowflake and Redshift</p>
 
 ### <ins>VPC, Roles and Execution</ins>
 <p>In this framework, AWS Lambda can be hosted on an AWS VPC. The input file is on Amazon S3, and the corresponding AWS Lambda role should only have access to read the file. Deploy an Amazon S3 endpoint to the VPC so that the AWS Lambda script can access the Amazon S3 location. The AmazonLambdaTaskExecutionRolePolicy is the execution role for EC2 Docker containers, and for Amazon S3 access, attached actions like Amazon S3: Get*, S3: List*, and S3: PutObject Access are available along with the resource name.  </p>
