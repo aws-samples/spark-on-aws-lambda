@@ -115,6 +115,12 @@ Browse to the Docker folder with all the required files. Build the Docker image 
 ```
 docker build --build-arg FRAMEWORK=DELTA -t sparkonlambda .
 ```
+Other options are 
+docker build --build-arg FRAMEWORK=DELTA,REDSHIFT -t sparkonlambda .
+docker build --build-arg FRAMEWORK=DELTA,SNOWFLAKE -t sparkonlambda .
+docker build --build-arg FRAMEWORK=ICEBERG -t sparkonlambda .
+docker build --build-arg FRAMEWORK=HUDI -t sparkonlambda .
+
 
 ### Run the docker 
 
