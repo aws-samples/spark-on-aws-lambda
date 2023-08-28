@@ -18,7 +18,7 @@ Once the container is deployed on AWS Lambda, it remains the same until the func
 
 The Spark logs will be part of the AWS Lambda logs stored in AWS Cloudwatch.
 
-![Architecture](https://github.com/aws-samples/spark-on-aws-lambda/blob/main/images/Github-diagram.jpg)
+![Architecture](https://github.com/aws-samples/spark-on-aws-lambda/blob/main/Architecture-Diagram.jpg)
 ***
 
 ### Current Challenge
