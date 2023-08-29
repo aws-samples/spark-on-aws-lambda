@@ -59,16 +59,18 @@ In this code sample, we are substituting a local shell script for the existing s
 <p>
 The provided script is a utility designed to facilitate the integration of PySpark with AWS Glue and Amazon S3. It offers functions to fetch table metadata from the AWS Glue Catalog, convert AWS Glue table schemas to PySpark schemas, and query tables stored in S3 using PySpark.
 
-Key functionalities of the script include:
+##### Key functionalities of the script include:
 Fetching Table Metadata: The get_table function fetches metadata of a specified table from the AWS Glue Catalog using the Boto3 library.
-
 Schema Conversion: The build_schema_for_table function converts the AWS Glue table schema into a PySpark schema. It supports a variety of data types, from basic types like strings and integers to complex types like arrays and structs. ANy datatype missing it will convert to StringType() and allows yout to add new datatype conversion.
-
 S3 Data Querying: The query_table function allows users to query a table stored in S3 using PySpark. It supports Delta and Parquet formats and prints the schema of the queried data.
-
 S3 URI Conversion: An internal utility function, _convert_s3_uri_to_s3a, ensures that S3 paths are compatible with Spark by converting "s3://" URIs to "s3a://" URIs.
 
 This script serves as a foundational tool for developers and data engineers working with AWS Glue, PySpark, and S3. By leveraging these functions, users can seamlessly integrate and process their data stored in S3 using the power of Spark.</p>
+
+
+
+#### libs/split-large-file-to-smaller-chunks.sh
+<p>This script provides a solution for efficiently handling large files(>400MB) stored in Amazon S3. Specifically, it downloads a specified file from an Amazon S3 bucket, splits it into manageable 128MB chunks locally, and then uploads each chunk back to a designated Amazon S3 location. This approach is particularly useful when dealing with data processing tasks that require partitioned data or when there's a need to distribute large datasets across multiple processes or nodes. By leveraging the AWS CLI, the script ensures seamless integration with the AWS ecosystem, making it a valuable tool for data engineers and AWS practitioners. Ensure you have sufficient local storage to temporarily in container or another Amazon S3 location to accommodate the original file and its subsequent chunks.</p>
 
 #### spark-scripts
 <p>Spark-scripts folder will contain all the pyspark scripts for various target framework integration like Apache HUDI, Apache Iceberg and Delta lake table. Note : Please specifiy S3a file path for all the input and output locations</p>
