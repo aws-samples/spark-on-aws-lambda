@@ -33,19 +33,44 @@ At present, on Amazon EMR and AWS Glue, the PySpark script will need to be run o
 This AWS sample is intended to show an example of a container-based approach. 
 
 
+#### AWS Lambda Memory to CPU Mapping
+
+AWS Lambda allocates CPU power in proportion to the amount of memory configured. The exact CPU to memory mapping is not publicly documented, but it is known that a function with 1,769 MB of memory has the equivalent of one vCPU (one vCPU-second of credits per second). This means that a function with 3,538 MB of memory would have the equivalent of two vCPUs, and so on.
+The following table shows the `approximate CPU to memory mapping for AWS Lambda`:
+
+| Memory (MB) | CPU (vCPU) |
+|---|---|
+| 128 | 0.2 |
+| 256 | 0.4 |
+| 512 | 0.8 |
+| 1,024 | 1.6 |
+| 1,769 | 2.0 |
+| 3,538 | 4.0 |
+| 7,076 | 8.0 |
+| 10,240 | 10.0 |
+
+It is important to note that the actual amount of CPU that a function receives may vary depending on the workload and other factors. For example, a function that is CPU-intensive will likely receive more CPU than a function that is memory-intensive.
+When running a `PySpark script` for a larger file, you can specify a higher memory allocation so that the data can be partitioned and distributed to `multiple vCPUs` for faster processing. This is because `PySpark uses a distributed processing model`, where the data is `divided into smaller chunks` and processed by multiple machines. The more memory that is available, the larger the chunks of data that can be processed at once, which can lead to faster performance.
+
+
 
 ####  DockerFile 
 <p>The DockerFile builds the image using an AWS based image for Python 3.8. During the build process, it installs PySpark, copies all the required files, and sets the credentials locally on the container. </p>
 
 #### sparkLambdaHandler.py 
-<p>This script is invoked in AWS Lambda when an event is triggered. The script downloads a Spark script from an S3 bucket, sets environment variables for the Spark application, and runs the spark-submit command to execute the Spark script.
+
+This script is invoked in AWS Lambda when an event is triggered. The script downloads a Spark script from an S3 bucket, sets environment variables for the Spark application, and runs the spark-submit command to execute the Spark script.
+
 Here is a summary of the main steps in the script:
-1. The lambda_handler function is the entry point for the Lambda function. It receives an event object and a context object as parameters.
-2. The s3_bucket_script and input_script variables are used to specify the Amazon S3 bucket and object key where the Spark script is located.
-3. The boto3 module is used to download the Spark script from Amazon S3 to a temporary file on the Lambda function's file system.
-4. The os.environ dictionary is used to set the PYSPARK_SUBMIT_ARGS environment variable, which is required by the Spark application to run.
-5. The subprocess.run method is used to execute the spark-submit command, passing in the path to the temporary file where the Spark script was downloaded.The event payload recieved by the lambda is passed onto the spark application via the event arguement.
-Overall, this script enables you to execute a Spark script in AWS Lambda by downloading it from an S3 bucket and running it using the spark-submit command. The script can be configured by setting environment variables, such as the PYSPARK_SUBMIT_ARGS variable, to control the behavior of the Spark application. </p>
+
+1. **Entry Point**: The `lambda_handler` function is the entry point for the Lambda function. It receives an event object and a context object as parameters.
+2. **S3 Script Location**: The `s3_bucket_script` and `input_script` variables are used to specify the Amazon S3 bucket and object key where the Spark script is located.
+3. **Download Script**: The `boto3` module is used to download the Spark script from Amazon S3 to a temporary file on the Lambda function's file system.
+4. **Set Environment Variables**: The `os.environ` dictionary is used to set the `PYSPARK_SUBMIT_ARGS` environment variable, which is required by the Spark application to run.
+5. **Execute Spark Script**: The `subprocess.run` method is used to execute the `spark-submit` command, passing in the path to the temporary file where the Spark script was downloaded. The event payload received by the lambda is passed onto the spark application via the event argument.
+
+Overall, this script enables you to execute a Spark script in AWS Lambda by downloading it from an S3 bucket and running it using the spark-submit command. The script can be configured by setting environment variables, such as the `PYSPARK_SUBMIT_ARGS` variable, to control the behavior of the Spark application.
+
 
 #### spark-class
 <p> spark-class is a script provided by Apache Spark that is used to launch Spark applications on a cluster or local mode. It is typically located in the bin directory of your Spark installation. The spark-class script sets up the classpath, system properties, and environment variables required to launch Spark, and then runs the specified class or script using the java command. It is designed to work with both Scala and Java applications.
