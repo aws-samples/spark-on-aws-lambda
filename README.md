@@ -81,21 +81,19 @@ In this code sample, we are substituting a local shell script for the existing s
 **Note :** Updates are required if JAVA_HOME and version have changed.
 
 #### libs/glue_functions-AWS Glue and PySpark Integration 
-<p>
-The provided script is a utility designed to facilitate the integration of PySpark with AWS Glue and Amazon S3. It offers functions to fetch table metadata from the AWS Glue Catalog, convert AWS Glue table schemas to PySpark schemas, and query tables stored in S3 using PySpark.
 
-#### libs/soal_read_write_lib.py - Large File processing using AWS Lambda
-The `spark.sql.files.maxPartitionBytes` configuration in Apache Spark determines the maximum size of each partition when reading data from file systems like Amazon S3. For processing large files on a AWS Lambda with limited resources, such as 2 or 10 vCPUs, adjusting this spark setting can be crucial. By reducing the partition size, Spark can better manage memory usage and avoid potential `out-of-memory errors`. Smaller partitions mean tasks are more granular, allowing for more efficient processing on machines with fewer cores. However, it's a balance; while smaller partitions can be processed faster individually, there's an overhead to managing more tasks. On a machine with 2 or 10 vCPUs, setting an optimal value for this configuration can help in efficiently processing big files without overwhelming the system. The script `soal_read_write_lib.py` under libs folder is developed to handle big file scenarios and avoid OOM errors.
+The provided script is a utility designed to facilitate the integration of PySpark with AWS Glue and Amazon S3. It offers functions to fetch table metadata from the AWS Glue Catalog, convert AWS Glue table schemas to PySpark schemas, and query tables stored in S3 using PySpark.
 
 ##### Key functionalities of the script include:
 Fetching Table Metadata: The get_table function fetches metadata of a specified table from the AWS Glue Catalog using the Boto3 library.
 Schema Conversion: The build_schema_for_table function converts the AWS Glue table schema into a PySpark schema. It supports a variety of data types, from basic types like strings and integers to complex types like arrays and structs. ANy datatype missing it will convert to StringType() and allows yout to add new datatype conversion.
 S3 Data Querying: The query_table function allows users to query a table stored in S3 using PySpark. It supports Delta and Parquet formats and prints the schema of the queried data.
-S3 URI Conversion: An internal utility function, _convert_s3_uri_to_s3a, ensures that S3 paths are compatible with Spark by converting "s3://" URIs to "s3a://" URIs.
+S3 URI Conversion: An internal utility function, _convert_s3_uri_to_s3a, ensures that S3 paths are compatible with Spark by converting "s3://" URIs to "s3a://" URIs.\
 
 This script serves as a foundational tool for developers and data engineers working with AWS Glue, PySpark, and S3. By leveraging these functions, users can seamlessly integrate and process their data stored in S3 using the power of Spark.</p>
 
-
+#### libs/soal_read_write_lib.py - Large File processing using AWS Lambda
+The `spark.sql.files.maxPartitionBytes` configuration in Apache Spark determines the maximum size of each partition when reading data from file systems like Amazon S3. For processing large files on a AWS Lambda with limited resources, such as 2 or 10 vCPUs, adjusting this spark setting can be crucial. By reducing the partition size, Spark can better manage memory usage and avoid potential `out-of-memory errors`. Smaller partitions mean tasks are more granular, allowing for more efficient processing on machines with fewer cores. However, it's a balance; while smaller partitions can be processed faster individually, there's an overhead to managing more tasks. On a machine with 2 or 10 vCPUs, setting an optimal value for this configuration can help in efficiently processing big files without overwhelming the system. The script `soal_read_write_lib.py` under libs folder is developed to handle big file scenarios and avoid OOM errors.
 
 #### libs/split-large-file-to-smaller-chunks.sh
 <p>This script provides a solution for efficiently handling large files(>400MB) stored in Amazon S3. Specifically, it downloads a specified file from an Amazon S3 bucket, splits it into manageable 128MB chunks locally, and then uploads each chunk back to a designated Amazon S3 location. This approach is particularly useful when dealing with data processing tasks that require partitioned data or when there's a need to distribute large datasets across multiple processes or nodes. By leveraging the AWS CLI, the script ensures seamless integration with the AWS ecosystem, making it a valuable tool for data engineers and AWS practitioners. Ensure you have sufficient local storage to temporarily in container or another Amazon S3 location to accommodate the original file and its subsequent chunks.</p>
@@ -117,7 +115,7 @@ This script serves as a foundational tool for developers and data engineers work
 <p>The provided script showcases a seamless integration between PySpark and the AWS Glue Data Catalog. Utilizing the AWS Python SDK, Boto3, the script enables efficient interactions with AWS Glue, allowing users to fetch table metadata and read data directly from specified S3 locations.  This allows SoAL framework to interact with AWS Glue data catalog
    and read tables. The schema can be capture by AWS Glue crawler.</p>
 
-####download_jar.sh
+##### download_jar.sh
 <p>The shell script downloads all the required jar files for the ACID frameworks like Apache HUDI, Apache Iceberg and Apache Delta table. It is based on the FRAMEWORK argument in the docker file while building the image Note : Added code for downloading jars for Snowflake and Redshift</p>
 
 ### <ins>VPC, Roles and Execution</ins>
