@@ -84,6 +84,9 @@ In this code sample, we are substituting a local shell script for the existing s
 <p>
 The provided script is a utility designed to facilitate the integration of PySpark with AWS Glue and Amazon S3. It offers functions to fetch table metadata from the AWS Glue Catalog, convert AWS Glue table schemas to PySpark schemas, and query tables stored in S3 using PySpark.
 
+#### libs/soal_read_write_lib.py - Large File processing using AWS Lambda
+The `spark.sql.files.maxPartitionBytes` configuration in Apache Spark determines the maximum size of each partition when reading data from file systems like Amazon S3. For processing large files on a AWS Lambda with limited resources, such as 2 or 10 vCPUs, adjusting this spark setting can be crucial. By reducing the partition size, Spark can better manage memory usage and avoid potential `out-of-memory errors`. Smaller partitions mean tasks are more granular, allowing for more efficient processing on machines with fewer cores. However, it's a balance; while smaller partitions can be processed faster individually, there's an overhead to managing more tasks. On a machine with 2 or 10 vCPUs, setting an optimal value for this configuration can help in efficiently processing big files without overwhelming the system. The script `soal_read_write_lib.py` under libs folder is developed to handle big file scenarios and avoid OOM errors.
+
 ##### Key functionalities of the script include:
 Fetching Table Metadata: The get_table function fetches metadata of a specified table from the AWS Glue Catalog using the Boto3 library.
 Schema Conversion: The build_schema_for_table function converts the AWS Glue table schema into a PySpark schema. It supports a variety of data types, from basic types like strings and integers to complex types like arrays and structs. ANy datatype missing it will convert to StringType() and allows yout to add new datatype conversion.
