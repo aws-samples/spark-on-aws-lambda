@@ -64,5 +64,7 @@ RUN chmod -R 755 $SPARK_HOME
 # Copy the Pyspark script to container
 COPY sparkLambdaHandler.py ${LAMBDA_TASK_ROOT}
 
+RUN wget https://repo1.maven.org/maven2/com/amazon/deequ/deequ/${DEEQU_FRAMEWORK_VERSION}/deequ-${DEEQU_FRAMEWORK_VERSION}.jar
+
 # calling the Lambda handler
 CMD [ "/var/task/sparkLambdaHandler.lambda_handler" ]

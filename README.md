@@ -111,6 +111,9 @@ The `spark.sql.files.maxPartitionBytes` configuration in Apache Spark determines
 ##### sample-spark-script-csv-to-delta-table.py
 <p> This script is a PySpark script that can be used to read a CSV file from an S3 location, add a timestamp column to it, and write it to a Delta table in another Amazon S3 location.</p> 
 
+##### sample-accomodations-to-deequ.py
+<p> This script is a PySpark script that can be used to read a CSV or Parquet file from an S3 location, run deequ to do data quality checks and write the verification results and metrics to Amazon S3 bucket location.</p> 
+
 ##### sample_script_glue_integration
 <p>The provided script showcases a seamless integration between PySpark and the AWS Glue Data Catalog. Utilizing the AWS Python SDK, Boto3, the script enables efficient interactions with AWS Glue, allowing users to fetch table metadata and read data directly from specified S3 locations.  This allows SoAL framework to interact with AWS Glue data catalog
    and read tables. The schema can be capture by AWS Glue crawler.</p>
@@ -125,7 +128,7 @@ The `spark.sql.files.maxPartitionBytes` configuration in Apache Spark determines
 #### <p><u>High level steps to build AWS Lambda using Spark container</u></p>
 
 
-1. Create a Docker file with an AWS base image, public.ecr.aws/lambda/python:3.8. The Dockerfile has the entrypoint to the Lambda_Hnadler and the command to execute the script when triggered.
+1. Create a Docker file with an AWS base image, public.ecr.aws/lambda/python:3.8. The Dockerfile has the entrypoint to the Lambda_Handler and the command to execute the script when triggered.
 2. Locally create a Docker image and container. Use AWS Cloud9, AWS workspace, or a local PC for this step.
 3. Create an Amazon ECR Repository and push the container to the repository. Manually upload to the AWS ECR repository or use the shell script aws-ecr-repository-push.sh or SAM template build and upload.
 4. Create an AWS Lambda function with the role AmazonLambdaTaskExecutionRolePolicy. Increase the memory and timeout settings to suit the file size. The environmental variable can be set if dynamic input is required.
@@ -139,7 +142,7 @@ Building a docker and pushing the image to the Amazon ECR registry. You can use 
 
 Browse to the Docker folder with all the required files. Build the Docker image locally by executing the Dockerfile locally.
 
-#Browse to the local folder and run the docker build along with the desired FRAMEWORK, HUDI, DELTA and ICEBERG
+#Browse to the local folder and run the docker build along with the desired FRAMEWORK, HUDI, DELTA, ICEBERG and DEEQU
 ```
 docker build --build-arg FRAMEWORK=DELTA -t sparkonlambda .
 ```
@@ -264,7 +267,7 @@ The task execution role grants the AWS Lambda permission to make AWS API calls o
 ```
 
 
-Amazon S3 ppolicy for read and write
+Amazon S3 policy for read and write
 ```
 {
     "Version": "2012-10-17",
