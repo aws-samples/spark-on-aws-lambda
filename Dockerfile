@@ -25,10 +25,12 @@ RUN yum update -y && \
     yum -y install java-1.8.0-openjdk && \
     pip install --upgrade pip && \
     pip install pyspark==$PYSPARK_VERSION boto3==1.28.27 && \
-    pip install sagemaker_pyspark && \
-    pip install --no-deps pydeequ && \
-    pip install pandas && \
     yum clean all
+
+# Install pydeequ if FRAMEWORK is DEEQU
+RUN if [ "$FRAMEWORK" = "DEEQU" ] ; then pip install --no-deps pydeequ && \
+pip install pandas && \
+yum clean all; else echo FRAMEWORK is ${FRAMEWORK} ; fi
 
 
 # Set environment variables for PySpark

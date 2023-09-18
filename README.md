@@ -308,4 +308,5 @@ Check if the trust policy has the below configuration
 ### License:
 
 License-https://github.com/aws-samples/spark-on-aws-lambda/blob/main/LICENSE
+For DEEQU Framework, this project uses ![PyDeequ](https://github.com/awslabs/python-deequ/tree/master) library. This is covered under Apache 2.0 license. Please refer to LICENSE.Apache.txt file for more details.
 

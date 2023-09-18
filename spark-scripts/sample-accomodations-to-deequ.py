@@ -1,7 +1,6 @@
 import sys
 import os
 import pydeequ
-import sagemaker_pyspark
 import uuid
 
 from pydeequ.suggestions import *
@@ -19,6 +18,8 @@ from pyspark.sql.functions import *
  Function that gets triggered when AWS Lambda is running.
  We are using the example from Redshift documentation
  https://docs.aws.amazon.com/redshift/latest/dg/spatial-tutorial.html#spatial-tutorial-test-data
+ 
+ We are using PyDeequ library which uses Apache 2.0 license. Please refer to LICENSE.Apache.txt file for more details.
 
   Add below parameters in the lambda function Environment Variables
   SCRIPT_BUCKET         BUCKET WHERE YOU SAVE THIS SCRIPT
@@ -29,7 +30,7 @@ from pyspark.sql.functions import *
   OUTPUT_PATH           THE PATH WHERE THE VERIFICATION RESULTS AND METRICS WILL BE STORED
 
   Lambda General Configuration for above input file. Based on the input file size, the memory can be updated.
-  Memory                 1024 MB
+  Memory                 2048 MB
   Tmeout                 2 min
   Ephemeral storage      1024 MB
 
