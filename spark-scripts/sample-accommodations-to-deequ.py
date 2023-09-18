@@ -24,10 +24,8 @@ from pyspark.sql.functions import *
   Add below parameters in the lambda function Environment Variables
   SCRIPT_BUCKET         BUCKET WHERE YOU SAVE THIS SCRIPT
   SPARK_SCRIPT          THE SCRIPT NAME AND PATH
-
-  Add the below parameters in the labmda function input event
-  INPUT_PATH            s3a://redshift-downloads/spatial-data/accommodations.csv
-  OUTPUT_PATH           THE PATH WHERE THE VERIFICATION RESULTS AND METRICS WILL BE STORED
+  input_path            s3a://redshift-downloads/spatial-data/accommodations.csv
+  output_path           THE PATH WHERE THE VERIFICATION RESULTS AND METRICS WILL BE STORED
 
   Lambda General Configuration for above input file. Based on the input file size, the memory can be updated.
   Memory                 2048 MB
@@ -44,8 +42,8 @@ if __name__ == "__main__":
         print("Usage: spark-dq [input-folder] [output-folder]")
         sys.exit(0)
 
-    input_path = os.environ['INPUT_PATH']
-    output_path = os.environ['OUTPUT_PATH']
+    input_path = os.environ['input_path']
+    output_path = os.environ['output_path']
 
 
     aws_region = os.environ['AWS_REGION']
