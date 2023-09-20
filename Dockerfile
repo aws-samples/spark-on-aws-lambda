@@ -28,9 +28,20 @@ RUN yum update -y && \
     yum clean all
 
 # Install pydeequ if FRAMEWORK is DEEQU
-RUN if [ "$FRAMEWORK" = "DEEQU" ] ; then pip install --no-deps pydeequ && \
-pip install pandas && \
-yum clean all; else echo FRAMEWORK is ${FRAMEWORK} ; fi
+#RUN if [ "$FRAMEWORK" = "DEEQU" ] ; then \
+#	pip install --no-deps pydeequ && \
+#	pip install pandas && \
+#	yum clean all; \
+#    else \
+#        echo FRAMEWORK is ${FRAMEWORK} ; \
+#    fi
+
+RUN echo "$FRAMEWORK" | grep -q "DEEQU" && \
+     pip install --no-deps pydeequ && \
+     pip install pandas && \
+     yum clean all && \
+     echo "DEEQU found in FRAMEWORK" || \
+     echo "DEEQU not found in FRAMEWORK"
 
 
 # Set environment variables for PySpark
