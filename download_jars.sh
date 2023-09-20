@@ -7,6 +7,7 @@ DELTA_FRAMEWORK_VERSION=$5
 HUDI_FRAMEWORK_VERSION=$6
 ICEBERG_FRAMEWORK_VERSION=$7
 ICEBERG_FRAMEWORK_SUB_VERSION=$8
+DEEQU_FRAMEWORK_VERSION=$9
 
 mkdir $SPARK_HOME/conf
 echo "SPARK_LOCAL_IP=127.0.0.1" > $SPARK_HOME/conf/spark-env.sh
@@ -63,4 +64,6 @@ case "$FRAMEWORK" in
         wget -q https://repo1.maven.org/maven2/io/delta/delta-core_2.12/${DELTA_FRAMEWORK_VERSION}/delta-core_2.12-${DELTA_FRAMEWORK_VERSION}.jar -P ${SPARK_HOME}/jars/
         wget -q https://repo1.maven.org/maven2/io/delta/delta-storage/${DELTA_FRAMEWORK_VERSION}/delta-storage-${DELTA_FRAMEWORK_VERSION}.jar -P ${SPARK_HOME}/jars/
         ;;
+    DEEQU)
+        wget -q https://repo1.maven.org/maven2/com/amazon/deequ/deequ/${DEEQU_FRAMEWORK_VERSION}/deequ-${DEEQU_FRAMEWORK_VERSION}.jar -P ${SPARK_HOME}/jars/
 esac
