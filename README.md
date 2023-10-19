@@ -42,7 +42,7 @@ Here is a summary of the main steps in the script:
 1. The lambda_handler function is the entry point for the Lambda function. It receives an event object and a context object as parameters.
 2. The s3_bucket_script and input_script variables are used to specify the Amazon S3 bucket and object key where the Spark script is located.
 3. The boto3 module is used to download the Spark script from Amazon S3 to a temporary file on the Lambda function's file system.
-4. The os.environ dictionary is used to set the PYSPARK_SUBMIT_ARGS environment variable, which is required by the Spark application to run.
+4. The os.environ dictionary is used to store any arguments passed via the lambda event.
 5. The subprocess.run method is used to execute the spark-submit command, passing in the path to the temporary file where the Spark script was downloaded.The event payload recieved by the lambda is passed onto the spark application via the event arguement.
 Overall, this script enables you to execute a Spark script in AWS Lambda by downloading it from an S3 bucket and running it using the spark-submit command. The script can be configured by setting environment variables, such as the PYSPARK_SUBMIT_ARGS variable, to control the behavior of the Spark application. </p>
 
