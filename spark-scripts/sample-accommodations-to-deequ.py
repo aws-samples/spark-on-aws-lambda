@@ -24,8 +24,8 @@ from pyspark.sql.functions import *
   Add below parameters in the lambda function Environment Variables
   SCRIPT_BUCKET         BUCKET WHERE YOU SAVE THIS SCRIPT
   SPARK_SCRIPT          THE SCRIPT NAME AND PATH
-  input_path            s3a://redshift-downloads/spatial-data/accommodations.csv
-  output_path           THE PATH WHERE THE VERIFICATION RESULTS AND METRICS WILL BE STORED
+  INPUT_PATH            s3a://redshift-downloads/spatial-data/accommodations.csv
+  OUTPUT_PATH           THE PATH WHERE THE VERIFICATION RESULTS AND METRICS WILL BE STORED
 
   Lambda General Configuration for above input file. Based on the input file size, the memory can be updated.
   Memory                 2048 MB
@@ -42,8 +42,8 @@ if __name__ == "__main__":
         print("Usage: spark-dq [input-folder] [output-folder]")
         sys.exit(0)
 
-    input_path = os.environ['input_path']
-    output_path = os.environ['output_path']
+    input_path = os.environ['INPUT_PATH']
+    output_path = os.environ['OUTPUT_PATH']
 
 
     aws_region = os.environ['AWS_REGION']
@@ -108,13 +108,13 @@ if __name__ == "__main__":
     checkResult_df = VerificationResult.checkResultsAsDataFrame(spark, checkResult)
     checkResult_df.show()
 
-    checkResult_df.repartition(1).write.csv(output_path+"/"+str(uuid.uuid4())+"/", sep=',')
+    checkResult_df.repartition(1).write.mode('overwrite').csv(output_path+"/verification-results/", sep=',')
 
     print("Showing VerificationResults metrics:")
     checkResult_df = VerificationResult.successMetricsAsDataFrame(spark, checkResult)
     checkResult_df.show()
 
-    checkResult_df.repartition(1).write.csv(output_path+"/"+str(uuid.uuid4())+"/", sep=',')
+    checkResult_df.repartition(1).write.mode('overwrite').csv(output_path+"/verification-results-metrics/", sep=',')
 
     spark.sparkContext._gateway.shutdown_callback_server()
     spark.stop()
