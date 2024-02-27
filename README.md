@@ -1,7 +1,7 @@
 <h1><p><u>Contents</u></p></h1>
 
 ### Please refer the Wikipage for latest updates. https://github.com/aws-samples/spark-on-aws-lambda/wiki
-### Disclaimer: At present AWS team is not planning to support the Github. The support model is open-source MIT-0 license.
+
 
 
 
