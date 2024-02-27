@@ -1,6 +1,0 @@
-.aws-sam
-.build
-.git
-.idea
-*.toml
-packaged-template.yaml
