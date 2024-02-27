@@ -19,7 +19,9 @@ Once the container is deployed on AWS Lambda, it remains the same until the func
 
 The Spark logs will be part of the AWS Lambda logs stored in AWS Cloudwatch.
 
+
 ![Architecture](https://github.com/aws-samples/spark-on-aws-lambda/blob/release-0.3.0/images/SoAL-Architecture.jpg)
+
 ***
 
 ### Current Challenge
@@ -62,6 +64,7 @@ When running a `PySpark script` for a larger file, you can specify a higher memo
 This script is invoked in AWS Lambda when an event is triggered. The script downloads a Spark script from an S3 bucket, sets environment variables for the Spark application, and runs the spark-submit command to execute the Spark script.
 
 Here is a summary of the main steps in the script:
+
 
 1. **Entry Point**: The `lambda_handler` function is the entry point for the Lambda function. It receives an event object and a context object as parameters.
 2. **S3 Script Location**: The `s3_bucket_script` and `input_script` variables are used to specify the Amazon S3 bucket and object key where the Spark script is located.
