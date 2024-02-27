@@ -6,7 +6,7 @@ ARG HADOOP_VERSION=3.2.4
 ARG AWS_SDK_VERSION=1.11.901
 ARG PYSPARK_VERSION=3.3.0
 
-#FRAMEWORK will passed during the Docker build. For Apache Iceberg in somecase downgrading PYSPARK_VERSION to 3.2.0 will be good
+#FRAMEWORK will passed during the Docker build 
 ARG FRAMEWORK
 ARG DELTA_FRAMEWORK_VERSION=2.2.0
 ARG HUDI_FRAMEWORK_VERSION=0.12.2
@@ -23,27 +23,12 @@ RUN yum update -y && \
     yum -y install yum-plugin-versionlock && \
     yum -y versionlock add java-1.8.0-openjdk-1.8.0.362.b08-0.amzn2.0.1.x86_64 && \
     yum -y install java-1.8.0-openjdk && \
-
     pip install --upgrade pip && \
     pip install pyspark==$PYSPARK_VERSION boto3==1.28.27 && \
-
+    pip install sagemaker_pyspark && \
+    pip install --no-deps pydeequ && \
+    pip install pandas && \
     yum clean all
-
-# Install pydeequ if FRAMEWORK is DEEQU
-#RUN if [ "$FRAMEWORK" = "DEEQU" ] ; then \
-#	pip install --no-deps pydeequ && \
-#	pip install pandas && \
-#	yum clean all; \
-#    else \
-#        echo FRAMEWORK is ${FRAMEWORK} ; \
-#    fi
-
-RUN echo "$FRAMEWORK" | grep -q "DEEQU" && \
-     pip install --no-deps pydeequ && \
-     pip install pandas && \
-     yum clean all && \
-     echo "DEEQU found in FRAMEWORK" || \
-     echo "DEEQU not found in FRAMEWORK"
 
 
 # Set environment variables for PySpark
@@ -78,6 +63,8 @@ RUN chmod -R 755 $SPARK_HOME
 
 # Copy the Pyspark script to container
 COPY sparkLambdaHandler.py ${LAMBDA_TASK_ROOT}
+
+RUN wget https://repo1.maven.org/maven2/com/amazon/deequ/deequ/${DEEQU_FRAMEWORK_VERSION}/deequ-${DEEQU_FRAMEWORK_VERSION}.jar
 
 # calling the Lambda handler
 CMD [ "/var/task/sparkLambdaHandler.lambda_handler" ]
