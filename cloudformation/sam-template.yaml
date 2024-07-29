@@ -37,7 +37,7 @@ Parameters:
     Default: 900
     Type: Number
   LambdaMemory:
-    Description: 'Optional: Lambda memory in MB (min 128 - 3008 max).'
+    Description: 'Optional: Lambda memory in MB (min 128 - 10,240 max).'
     Default: 3008
     Type: Number
   SparkLambdapermissionPolicyArn:
