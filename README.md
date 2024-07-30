@@ -54,7 +54,8 @@ The following table shows the `approximate CPU to memory mapping for AWS Lambda`
 It is important to note that the actual amount of CPU that a function receives may vary depending on the workload and other factors. For example, a function that is CPU-intensive will likely receive more CPU than a function that is memory-intensive.
 When running a `PySpark script` for a larger file, you can specify a higher memory allocation so that the data can be partitioned and distributed to `multiple vCPUs` for faster processing. This is because `PySpark uses a distributed processing model`, where the data is `divided into smaller chunks` and processed by multiple machines. The more memory that is available, the larger the chunks of data that can be processed at once, which can lead to faster performance.
 
-
+####  Initialization Duration on AWS Lambda
+<p>Our performance testing of SoAL revealed an average initialization duration of 550 ms, which is significantly faster compared to the Spark Cluster mode.</p>
 
 ####  DockerFile 
 <p>The DockerFile builds the image using an AWS based image for Python 3.8. During the build process, it installs PySpark, copies all the required files, and sets the credentials locally on the container. </p>
