@@ -18,6 +18,7 @@ ARG ICEBERG_FRAMEWORK_SUB_VERSION=1.0.0
 
 ARG DEEQU_FRAMEWORK_VERSION=2.0.3-spark-3.3
 
+RUN sed -i '/\[main\]/a sslverify=false' /etc/yum.conf
 
 # Perform system updates and install dependencies
 RUN yum update -y && \
