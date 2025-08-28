@@ -1,0 +1,140 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Test infrastructure for Iceberg Glue Catalog integration with Spark on Lambda'
+
+Parameters:
+  BucketName:
+    Type: String
+    Default: 'spark-lambda-iceberg-test'
+    Description: 'S3 bucket name for test data and scripts'
+  
+  DatabaseName:
+    Type: String
+    Default: 'iceberg_test_db'
+    Description: 'Glue database name for Iceberg tables'
+
+Resources:
+  # S3 Bucket for test data and scripts
+  TestDataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${BucketName}-${AWS::AccountId}'
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # Glue Database
+  IcebergTestDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: !Ref DatabaseName
+        Description: 'Test database for Iceberg tables'
+
+  # Sample Iceberg Table
+  SampleIcebergTable:
+    Type: AWS::Glue::Table
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseName: !Ref IcebergTestDatabase
+      TableInput:
+        Name: 'sample_customers'
+        Description: 'Sample Iceberg table for testing'
+        TableType: 'EXTERNAL_TABLE'
+        Parameters:
+          table_type: 'ICEBERG'
+          metadata_location: !Sub 's3://${BucketName}-${AWS::AccountId}/iceberg-tables/sample_customers/metadata/00000-409702ba-4735-4645-8f14-09537cc0b2c8.metadata.json'
+        StorageDescriptor:
+          Location: !Sub 's3://${BucketName}-${AWS::AccountId}/iceberg-tables/sample_customers/'
+          InputFormat: 'org.apache.iceberg.mr.hive.HiveIcebergInputFormat'
+          OutputFormat: 'org.apache.iceberg.mr.hive.HiveIcebergOutputFormat'
+          SerdeInfo:
+            SerializationLibrary: 'org.apache.iceberg.mr.hive.HiveIcebergSerDe'
+          Columns:
+            - Name: 'customer_id'
+              Type: 'bigint'
+            - Name: 'customer_name'
+              Type: 'string'
+            - Name: 'email'
+              Type: 'string'
+            - Name: 'registration_date'
+              Type: 'date'
+            - Name: 'total_orders'
+              Type: 'int'
+            - Name: 'total_spent'
+              Type: 'decimal(10,2)'
+            - Name: 'last_updated'
+              Type: 'timestamp'
+
+  # Lambda Execution Role
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'SparkLambdaIcebergRole-${AWS::StackName}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: GlueCatalogAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - glue:GetDatabase
+                  - glue:GetTable
+                  - glue:GetTables
+                  - glue:GetPartition
+                  - glue:GetPartitions
+                Resource:
+                  - !Sub 'arn:aws:glue:${AWS::Region}:${AWS::AccountId}:catalog'
+                  - !Sub 'arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/${DatabaseName}'
+                  - !Sub 'arn:aws:glue:${AWS::Region}:${AWS::AccountId}:table/${DatabaseName}/*'
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:GetBucketLocation
+                  - s3:PutObject
+                Resource:
+                  - !GetAtt TestDataBucket.Arn
+                  - !Sub '${TestDataBucket.Arn}/*'
+
+Outputs:
+  BucketName:
+    Description: 'S3 bucket name for test data'
+    Value: !Ref TestDataBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-BucketName'
+  
+  DatabaseName:
+    Description: 'Glue database name'
+    Value: !Ref IcebergTestDatabase
+    Export:
+      Name: !Sub '${AWS::StackName}-DatabaseName'
+  
+  TableName:
+    Description: 'Iceberg table name'
+    Value: 'sample_customers'
+    Export:
+      Name: !Sub '${AWS::StackName}-TableName'
+  
+  LambdaRoleArn:
+    Description: 'Lambda execution role ARN'
+    Value: !GetAtt LambdaExecutionRole.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-LambdaRoleArn'
