@@ -6,8 +6,7 @@
 - `libs/glue_functions/iceberg_glue_functions.py` - Core Iceberg functions for Glue Catalog integration
 
 ### Production Code
-- `lambda-deployment/spark-iceberg-reader.py` - Production Lambda handler
-- `lambda-deployment/deploy-production-lambda.sh` - Deployment script
+- `sparkLambdaHandler.py` - Main Lambda handler with Iceberg support
 
 ### Key Examples (Kept)
 - `examples/advanced-iceberg-features.py` - Time travel and metadata queries
